@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { QrCode, TrendingUp, Award, Flame } from "lucide-react";
+import { useEffect, useState } from "react";
+import { QrCode, TrendingUp, Award, Flame, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { QrScanModal } from "@/components/QrScanModal";
+import { TxHash } from "@/components/TxHash";
 import { useWallet, shortAddr } from "@/lib/wallet";
-import { RECENT_TX } from "@/lib/mockData";
+import { getDepositorHistory, type WasteDeposit } from "@/lib/api/ecoApi";
 
 export const Route = createFileRoute("/consumer")({
   head: () => ({ meta: [{ title: "Consumer Wallet · EcoToken" }] }),
@@ -12,8 +13,42 @@ export const Route = createFileRoute("/consumer")({
 });
 
 function Consumer() {
-  const { address, balance, connect } = useWallet();
+  const { address, balance, connect, loading: walletLoading, refreshBalance } = useWallet();
   const [scanOpen, setScanOpen] = useState(false);
+  const [deposits, setDeposits] = useState<WasteDeposit[]>([]);
+  const [totalTokens, setTotalTokens] = useState(0);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Load deposit history from backend
+  useEffect(() => {
+    if (!address) {
+      setDeposits([]);
+      setTotalTokens(0);
+      return;
+    }
+    setLoadingHistory(true);
+    getDepositorHistory(address)
+      .then((res) => {
+        setDeposits(res.deposits ?? []);
+        setTotalTokens(res.totalTokens ?? 0);
+      })
+      .catch(() => { })
+      .finally(() => setLoadingHistory(false));
+  }, [address]);
+
+  const handleScanComplete = () => {
+    setScanOpen(false);
+    // Refresh the deposit history after a scan/drop-off
+    if (address) {
+      refreshBalance();
+      getDepositorHistory(address)
+        .then((res) => {
+          setDeposits(res.deposits ?? []);
+          setTotalTokens(res.totalTokens ?? 0);
+        })
+        .catch(() => { });
+    }
+  };
 
   return (
     <AppShell>
@@ -26,7 +61,9 @@ function Consumer() {
                 <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
                   Wallet Balance
                 </p>
-                <h2 className="text-4xl font-semibold mt-1">{balance.toFixed(2)}</h2>
+                <h2 className="text-4xl font-semibold mt-1">
+                  {address ? (balance ?? totalTokens) : "—"}
+                </h2>
                 <p className="text-sm text-brand-accent">$ECOTKN</p>
               </div>
               <div className="size-10 bg-brand-primary/30 rounded-lg grid place-items-center">
@@ -35,11 +72,14 @@ function Consumer() {
             </div>
             <div className="space-y-3">
               <div className="flex justify-between text-xs text-neutral-400">
-                <span>Lifetime CO₂ offset</span>
-                <span className="font-mono text-neutral-200">42.8 kg</span>
+                <span>Total drops</span>
+                <span className="font-mono text-neutral-200">{deposits.length}</span>
               </div>
               <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
-                <div className="h-full bg-brand-accent w-3/4" />
+                <div
+                  className="h-full bg-brand-accent transition-all"
+                  style={{ width: `${Math.min(deposits.length * 10, 100)}%` }}
+                />
               </div>
               <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest pt-3 border-t border-neutral-800 mt-3">
                 {address ? shortAddr(address) : "Wallet not connected"}
@@ -49,31 +89,40 @@ function Consumer() {
 
           <button
             onClick={() => (address ? setScanOpen(true) : connect())}
-            className="w-full flex items-center justify-between py-4 px-4 bg-brand-primary text-neutral-50 rounded-[12px] font-medium active:scale-98 transition-transform"
+            disabled={walletLoading}
+            className="w-full flex items-center justify-between py-4 px-4 bg-brand-primary text-neutral-50 rounded-[12px] font-medium active:scale-98 transition-transform disabled:opacity-60"
           >
             <span className="flex items-center gap-3">
-              <QrCode className="size-4" />
-              {address ? "Scan waste QR" : "Connect to scan"}
+              {walletLoading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <QrCode className="size-4" />
+              )}
+              {!address
+                ? "Connect MetaMask"
+                : walletLoading
+                  ? "Connecting…"
+                  : "Scan waste QR"}
             </span>
             <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">
-              Camera
+              {address ? "Camera" : "MetaMask"}
             </span>
           </button>
 
           <div className="grid grid-cols-3 gap-3">
-            <ImpactTile icon={Award} value="L4" label="Guardian" />
-            <ImpactTile icon={Flame} value="14" label="Streak" />
-            <ImpactTile icon={TrendingUp} value="62" label="Items" />
+            <ImpactTile icon={Award} value={deposits.length > 10 ? "L4" : `L${Math.floor(deposits.length / 3) + 1}`} label="Guardian" />
+            <ImpactTile icon={Flame} value={String(deposits.length)} label="Drops" />
+            <ImpactTile icon={TrendingUp} value={String(totalTokens)} label="Tokens" />
           </div>
         </section>
 
         {/* Recent ledger */}
         <section className="md:col-span-8">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Recent chain events</h3>
-            <a href="#" className="text-xs font-mono text-ui-muted uppercase tracking-widest hover:text-brand-primary">
-              View explorer
-            </a>
+            <h3 className="text-lg font-semibold">Your deposit history</h3>
+            <span className="text-xs font-mono text-ui-muted uppercase tracking-widest">
+              {deposits.length} transaction{deposits.length !== 1 ? "s" : ""}
+            </span>
           </div>
 
           <div className="bg-card ring-1 ring-black/5 rounded-[12px] overflow-x-auto">
@@ -81,42 +130,69 @@ function Consumer() {
               <thead className="bg-zinc-50">
                 <tr>
                   <Th>Tx Hash</Th>
-                  <Th>Action</Th>
-                  <Th>Value</Th>
+                  <Th>Material</Th>
+                  <Th>Weight</Th>
+                  <Th>Tokens</Th>
                   <Th className="text-right">Status</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {RECENT_TX.map((t) => (
-                  <tr key={t.hash}>
-                    <td className="px-4 py-4 font-mono text-xs text-ui-muted">{t.hash}</td>
-                    <td className="px-4 py-4 font-medium">{t.action}</td>
-                    <td
-                      className={`px-4 py-4 font-mono ${
-                        t.value.startsWith("+") ? "text-brand-secondary" : t.value.startsWith("-") ? "text-ui-muted" : ""
-                      }`}
-                    >
-                      {t.value}
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <span
-                        className={`inline-block size-1.5 rounded-full mr-2 ${
-                          t.status === "Confirmed" ? "bg-emerald-500" : "bg-amber-400"
-                        }`}
-                      />
-                      <span className="text-[11px] font-medium uppercase tracking-tight">
-                        {t.status}
-                      </span>
+                {!address ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-ui-muted text-sm">
+                      Connect your wallet to see your deposit history
                     </td>
                   </tr>
-                ))}
+                ) : loadingHistory ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-ui-muted text-sm">
+                      <Loader2 className="size-4 animate-spin inline mr-2" />
+                      Loading from backend…
+                    </td>
+                  </tr>
+                ) : deposits.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-ui-muted text-sm">
+                      No deposits yet. Scan a QR code and drop off waste to earn $ECO!
+                    </td>
+                  </tr>
+                ) : (
+                  deposits.map((d) => (
+                    <tr key={d.id}>
+                      <td className="px-4 py-4">
+                        <TxHash hash={d.txHash} />
+                      </td>
+                      <td className="px-4 py-4 font-medium">{d.wasteTypeName}</td>
+                      <td className="px-4 py-4 font-mono">{d.weightGrams}g</td>
+                      <td className="px-4 py-4 font-mono text-brand-secondary">
+                        +{d.tokensEarned} ECO
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <span
+                          className={`inline-block size-1.5 rounded-full mr-2 ${d.status === 1
+                              ? "bg-emerald-500"
+                              : d.status === 2
+                                ? "bg-red-500"
+                                : "bg-amber-400"
+                            }`}
+                        />
+                        <span className="text-[11px] font-medium uppercase tracking-tight">
+                          {d.statusName}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </section>
       </main>
 
-      <QrScanModal open={scanOpen} onClose={() => setScanOpen(false)} />
+      <QrScanModal
+        open={scanOpen}
+        onClose={handleScanComplete}
+      />
     </AppShell>
   );
 }

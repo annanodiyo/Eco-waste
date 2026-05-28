@@ -268,7 +268,12 @@ export function QrScanModal({
                   <div className="size-3 bg-brand-accent rounded-full" />
                 </div>
                 <p className="mt-3 text-neutral-300 font-mono text-[10px] uppercase tracking-widest">
-                  Item ID #{product.id}
+                  {scannedData?.productId
+                    ? `Product #${scannedData.productId.slice(0, 8)}…`
+                    : "Manual entry"}
+                </p>
+                <p className="text-neutral-50 font-medium mt-1">
+                  {scannedData?.name ?? "Unknown item"}
                 </p>
                 <p className="text-neutral-50 font-medium mt-1">
                   {product.name}
@@ -355,6 +360,21 @@ export function QrScanModal({
             >
               Close
             </button>
+          </div>
+        )}
+
+        {phase === "rewarded" && deposit && (
+          <div className="px-5 py-4 space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="text-ui-muted">Tokens earned</span>
+              <span className="font-mono text-brand-secondary font-semibold">
+                +{deposit.tokensEarned} $ECO
+              </span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-ui-muted">Deposit ID</span>
+              <span className="font-mono">#{deposit.id}</span>
+            </div>
           </div>
         )}
       </div>
