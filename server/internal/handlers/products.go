@@ -31,14 +31,7 @@ func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 
 	productID := uuid.New().String()
 
-	qrPayload := services.QRPayload{
-		ProductID:    productID,
-		Name:         req.Name,
-		Manufacturer: req.Manufacturer,
-		Material:     int(req.Material),
-		WeightGrams:  req.WeightGrams,
-	}
-	qrBase64, err := services.GenerateQR(qrPayload)
+	qrBase64, err := services.GenerateQR(productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate QR: " + err.Error()})
 		return
@@ -115,7 +108,7 @@ func (h *ProductHandler) DecodeQR(c *gin.Context) {
 		return
 	}
 
-	product, err := h.repo.Get(payload.ProductID)
+	product, err := h.repo.Get(payload.PID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
 		return
