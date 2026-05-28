@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+
 	"github.com/annanodiyo/Eco-waste/server/internal/database"
 	"github.com/annanodiyo/Eco-waste/server/internal/handlers"
 	"github.com/annanodiyo/Eco-waste/server/internal/middleware"
@@ -14,6 +16,7 @@ type App struct {
 	wasteHandler   *handlers.WasteHandler
 	productHandler *handlers.ProductHandler
 	statsHandler   *handlers.StatsHandler
+	indexer        *services.EventIndexer
 	router         *gin.Engine
 }
 
@@ -33,6 +36,7 @@ func NewApp() *App {
 		wasteHandler:   handlers.NewWasteHandler(depRepo, prodRepo, bc),
 		productHandler: handlers.NewProductHandler(prodRepo, bc),
 		statsHandler:   handlers.NewStatsHandler(depRepo, userRepo),
+		indexer:        services.NewEventIndexer(prodRepo, depRepo),
 		router:         gin.New(),
 	}
 }
@@ -88,6 +92,8 @@ func (a *App) routes() {
 func (a *App) run() {
 	a.middlewares()
 	a.routes()
+	// Start background event indexer (no-op if ETH_RPC_URL is unset)
+	a.indexer.Start(context.Background())
 	_ = a.router.Run(":8080")
 }
 
