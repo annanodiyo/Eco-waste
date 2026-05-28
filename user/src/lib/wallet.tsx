@@ -1,53 +1,119 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { getDepositorHistory } from "@/lib/api/ecoApi";
+
+// Extend the global Window with MetaMask's injected provider
+declare global {
+  interface Window {
+    ethereum?: {
+      isMetaMask?: boolean;
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+      on: (event: string, handler: (...args: unknown[]) => void) => void;
+      removeListener: (event: string, handler: (...args: unknown[]) => void) => void;
+    };
+  }
+}
 
 type WalletState = {
   address: string | null;
   balance: number;
+  loading: boolean;
   connect: () => Promise<void>;
   disconnect: () => void;
-  addReward: (amount: number) => void;
+  refreshBalance: () => Promise<void>;
 };
 
 const WalletCtx = createContext<WalletState | null>(null);
 
-const MOCK_ADDRESS = "0xA1b2C3d4E5f6789012345678901234567890F09e";
-
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<string | null>(null);
-  const [balance, setBalance] = useState(1240.5);
+  const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(false);
 
+  // Refresh token balance from the backend
+  const refreshBalance = useCallback(async () => {
+    if (!address) return;
+    try {
+      const { totalTokens } = await getDepositorHistory(address);
+      setBalance(totalTokens);
+    } catch {
+      // backend may not be running yet — keep current balance
+    }
+  }, [address]);
+
+  // On mount, restore from localStorage and listen for account changes
   useEffect(() => {
     if (typeof window === "undefined") return;
+
     const saved = window.localStorage.getItem("ecotoken:wallet");
     if (saved) {
-      const { address: a, balance: b } = JSON.parse(saved);
-      setAddress(a);
-      setBalance(b ?? 1240.5);
+      try {
+        const { address: a } = JSON.parse(saved);
+        if (a) setAddress(a);
+      } catch {
+        /* corrupted — ignore */
+      }
     }
+
+    const handleAccountsChanged = (accounts: unknown) => {
+      const accs = accounts as string[];
+      if (accs.length === 0) {
+        setAddress(null);
+        window.localStorage.removeItem("ecotoken:wallet");
+      } else {
+        setAddress(accs[0]);
+        window.localStorage.setItem("ecotoken:wallet", JSON.stringify({ address: accs[0] }));
+      }
+    };
+
+    window.ethereum?.on("accountsChanged", handleAccountsChanged);
+    return () => {
+      window.ethereum?.removeListener("accountsChanged", handleAccountsChanged);
+    };
   }, []);
 
+  // Fetch balance whenever address changes
+  useEffect(() => {
+    refreshBalance();
+  }, [address, refreshBalance]);
+
+  // Persist address
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (address) {
-      window.localStorage.setItem(
-        "ecotoken:wallet",
-        JSON.stringify({ address, balance }),
-      );
+      window.localStorage.setItem("ecotoken:wallet", JSON.stringify({ address }));
     }
-  }, [address, balance]);
+  }, [address]);
 
   const connect = async () => {
-    await new Promise((r) => setTimeout(r, 600));
-    setAddress(MOCK_ADDRESS);
+    if (!window.ethereum) {
+      window.open("https://metamask.io/download/", "_blank");
+      return;
+    }
+    setLoading(true);
+    try {
+      const accounts = (await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })) as string[];
+      if (accounts[0]) {
+        setAddress(accounts[0]);
+      }
+    } catch (err) {
+      console.error("MetaMask connect error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
   const disconnect = () => {
     setAddress(null);
-    if (typeof window !== "undefined") window.localStorage.removeItem("ecotoken:wallet");
+    setBalance(0);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("ecotoken:wallet");
+    }
   };
-  const addReward = (amount: number) => setBalance((b) => +(b + amount).toFixed(2));
 
   return (
-    <WalletCtx.Provider value={{ address, balance, connect, disconnect, addReward }}>
+    <WalletCtx.Provider value={{ address, balance, loading, connect, disconnect, refreshBalance }}>
       {children}
     </WalletCtx.Provider>
   );
@@ -59,5 +125,4 @@ export function useWallet() {
   return ctx;
 }
 
-export const shortAddr = (a: string | null) =>
-  a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "";
+export const shortAddr = (a: string | null) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
