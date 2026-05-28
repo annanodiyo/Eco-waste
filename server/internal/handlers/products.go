@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ecotoken/backend/internal/models"
-	"github.com/ecotoken/backend/internal/services"
+	"github.com/annanodiyo/Eco-waste/server/internal/models"
+	"github.com/annanodiyo/Eco-waste/server/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -20,7 +20,7 @@ func NewProductHandler(store *models.Store, bc *services.BlockchainService) *Pro
 	return &ProductHandler{store: store, blockchain: bc}
 }
 
-// POST /api/products/register
+// POST /api/v1/products/register
 func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 	var req models.RegisterProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -30,7 +30,6 @@ func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 
 	productID := uuid.New().String()
 
-	// Generate QR code
 	qrPayload := services.QRPayload{
 		ProductID:    productID,
 		Name:         req.Name,
@@ -44,14 +43,12 @@ func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 		return
 	}
 
-	// Send to blockchain (mock or real)
 	txHash, err := h.blockchain.RegisterProductOnChain(
 		productID, req.Name, uint8(req.Material),
-		nil, // big.Int weight — simplified here
+		nil,
 		req.Manufacturer,
 	)
 	if err != nil {
-		// Log but don't fail — store locally still
 		fmt.Printf("blockchain register error (non-fatal): %v\n", err)
 		txHash = "pending"
 	}
@@ -70,11 +67,10 @@ func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 	}
 
 	h.store.AddProduct(product)
-
 	c.JSON(http.StatusCreated, product)
 }
 
-// GET /api/products/:id
+// GET /api/v1/products/:id
 func (h *ProductHandler) GetProduct(c *gin.Context) {
 	id := c.Param("id")
 	product, ok := h.store.GetProduct(id)
@@ -85,13 +81,13 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
-// GET /api/products
+// GET /api/v1/products
 func (h *ProductHandler) ListProducts(c *gin.Context) {
 	products := h.store.GetAllProducts()
 	c.JSON(http.StatusOK, gin.H{"products": products, "total": len(products)})
 }
 
-// POST /api/products/decode-qr — decodes a QR payload string from the scanner
+// POST /api/v1/products/decode-qr
 func (h *ProductHandler) DecodeQR(c *gin.Context) {
 	var body struct {
 		QRData string `json:"qrData" binding:"required"`
@@ -107,7 +103,6 @@ func (h *ProductHandler) DecodeQR(c *gin.Context) {
 		return
 	}
 
-	// Also look up in store for full details
 	product, ok := h.store.GetProduct(payload.ProductID)
 	if ok {
 		c.JSON(http.StatusOK, gin.H{"payload": payload, "product": product, "found": true})

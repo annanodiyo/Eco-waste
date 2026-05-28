@@ -1,4 +1,3 @@
-
 package services
 
 import (
@@ -9,7 +8,7 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 )
 
-// QRPayload is encoded inside the QR code
+// QRPayload is encoded inside the QR code.
 type QRPayload struct {
 	ProductID    string `json:"productId"`
 	Name         string `json:"name"`
@@ -18,22 +17,20 @@ type QRPayload struct {
 	WeightGrams  int    `json:"weightGrams"`
 }
 
-// GenerateQR creates a base64 PNG of the QR code for the given product
+// GenerateQR creates a base64-encoded PNG of the QR code for the given product.
 func GenerateQR(payload QRPayload) (string, error) {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		return "", fmt.Errorf("marshal qr payload: %w", err)
 	}
-
 	png, err := qrcode.Encode(string(data), qrcode.Medium, 256)
 	if err != nil {
 		return "", fmt.Errorf("generate qr: %w", err)
 	}
-
 	return base64.StdEncoding.EncodeToString(png), nil
 }
 
-// DecodeQR decodes a QR string back to a payload (for frontend helpers)
+// DecodeQR decodes a raw JSON QR string back to a QRPayload.
 func DecodeQR(qrData string) (*QRPayload, error) {
 	var payload QRPayload
 	if err := json.Unmarshal([]byte(qrData), &payload); err != nil {

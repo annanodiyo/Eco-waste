@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ecotoken/backend/internal/models"
-	"github.com/ecotoken/backend/internal/services"
+	"github.com/annanodiyo/Eco-waste/server/internal/models"
+	"github.com/annanodiyo/Eco-waste/server/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +20,7 @@ func NewWasteHandler(store *models.Store, bc *services.BlockchainService) *Waste
 	return &WasteHandler{store: store, blockchain: bc}
 }
 
-// POST /api/waste/deposit
+// POST /api/v1/waste/deposit
 func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 	var req models.WasteDepositRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -30,7 +30,7 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 
 	wasteType := req.WasteType
 
-	// If QR scan, look up product to get correct waste type
+	// If QR scan, look up product to get correct waste type.
 	if req.HasQR && req.ProductID != "" {
 		product, ok := h.store.GetProduct(req.ProductID)
 		if !ok {
@@ -42,10 +42,9 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 
 	tokens := models.CalculateTokens(wasteType, req.WeightGrams)
 
-	// Submit to blockchain
 	txHash, err := h.blockchain.DepositWasteOnChain(
-		req.ProductID, req.HasQR, 
-		[20]byte{}, // simplified — real version: common.HexToAddress(req.DepositorAddr)
+		req.ProductID, req.HasQR,
+		[20]byte{}, // real version: common.HexToAddress(req.DepositorAddr)
 		uint8(wasteType), nil,
 	)
 	if err != nil {
@@ -70,11 +69,10 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 
 	id := h.store.AddDeposit(deposit)
 	deposit.ID = id
-
 	c.JSON(http.StatusCreated, deposit)
 }
 
-// POST /api/waste/confirm-recycling
+// POST /api/v1/waste/confirm-recycling
 func (h *WasteHandler) ConfirmRecycling(c *gin.Context) {
 	var req models.ConfirmRecyclingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -104,11 +102,10 @@ func (h *WasteHandler) ConfirmRecycling(c *gin.Context) {
 	deposit.RecycledAt = &now
 	deposit.TxHash = txHash
 	h.store.UpdateDeposit(deposit)
-
 	c.JSON(http.StatusOK, deposit)
 }
 
-// GET /api/waste/depositor/:address
+// GET /api/v1/waste/depositor/:address
 func (h *WasteHandler) GetDepositorHistory(c *gin.Context) {
 	addr := c.Param("address")
 	deposits := h.store.GetDepositsByDepositor(addr)
@@ -123,19 +120,19 @@ func (h *WasteHandler) GetDepositorHistory(c *gin.Context) {
 	})
 }
 
-// GET /api/waste/pending
+// GET /api/v1/waste/pending
 func (h *WasteHandler) GetPendingDeposits(c *gin.Context) {
 	deposits := h.store.GetPendingDeposits()
 	c.JSON(http.StatusOK, gin.H{"deposits": deposits, "total": len(deposits)})
 }
 
-// GET /api/waste/all
+// GET /api/v1/waste/all
 func (h *WasteHandler) GetAllDeposits(c *gin.Context) {
 	deposits := h.store.GetAllDeposits()
 	c.JSON(http.StatusOK, gin.H{"deposits": deposits, "total": len(deposits)})
 }
 
-// GET /api/waste/:id
+// GET /api/v1/waste/:id
 func (h *WasteHandler) GetDeposit(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
