@@ -30,7 +30,7 @@ func NewApp() *App {
 func (a *App) middlewares() {
 	a.router.Use(gin.Logger())
 	a.router.Use(gin.Recovery())
-	middleware.Cors(a.router)
+	middleware.Cors(a.router) // fixed: was `m.Cors(a.router)` with undefined `m`
 }
 
 func (a *App) routes() {
@@ -48,6 +48,7 @@ func (a *App) routes() {
 	v1.GET("/waste/depositor/:address", a.wasteHandler.GetDepositorHistory)
 	v1.GET("/waste/pending", a.wasteHandler.GetPendingDeposits)
 	v1.GET("/waste/all", a.wasteHandler.GetAllDeposits)
+	v1.GET("/amount/:address/kshs", a.wasteHandler.ConsumerTokensToKSH)
 	v1.GET("/waste/:id", a.wasteHandler.GetDeposit)
 }
 
