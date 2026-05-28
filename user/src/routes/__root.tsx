@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { WalletProvider } from "@/lib/wallet";
+import { RoleSessionProvider } from "@/lib/roleSession";
 
 function NotFoundComponent() {
   return (
@@ -79,13 +80,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Track waste from manufacturer to recycler on-chain. Scan QR codes, drop off waste, and earn EcoTokens with full transparency.",
       },
-      { property: "og:title", content: "EcoToken — Waste Traceability Ledger" },
+      { property: "og:title", content: "EcoToken — Waste Traceability & Incentive Ledger" },
       {
         property: "og:description",
         content: "Material provenance recorded on-chain. Scan, drop off, earn.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "EcoToken — Waste Traceability & Incentive Ledger" },
+      { name: "description", content: "EcoTrace Chain tracks waste lifecycle on blockchain, rewarding recycling and building transparency." },
+      { property: "og:description", content: "EcoTrace Chain tracks waste lifecycle on blockchain, rewarding recycling and building transparency." },
+      { name: "twitter:description", content: "EcoTrace Chain tracks waste lifecycle on blockchain, rewarding recycling and building transparency." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/90e94577-fce6-456e-a209-4e28b6a72a20/id-preview-cfe4514b--092ad4cb-c5b7-474b-8619-5f5643bb7c2d.lovable.app-1779966643111.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/90e94577-fce6-456e-a209-4e28b6a72a20/id-preview-cfe4514b--092ad4cb-c5b7-474b-8619-5f5643bb7c2d.lovable.app-1779966643111.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -123,7 +130,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <WalletProvider>
-        <Outlet />
+        <RoleSessionProvider>
+          <Outlet />
+        </RoleSessionProvider>
       </WalletProvider>
     </QueryClientProvider>
   );

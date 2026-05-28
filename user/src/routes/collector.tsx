@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check, Boxes, Truck, Coins } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ChainBadge } from "@/components/ChainBadge";
+import { ConfirmSignDialog, type ConfirmSignBatch } from "@/components/ConfirmSignDialog";
 import { VERIFICATION_QUEUE, INVENTORY, PICKUPS } from "@/lib/mockData";
 import { useState } from "react";
 
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/collector")({
 
 function Collector() {
   const [verified, setVerified] = useState<string[]>([]);
+  const [pending, setPending] = useState<ConfirmSignBatch | null>(null);
 
   return (
     <AppShell>
@@ -53,7 +55,7 @@ function Collector() {
                     <p className="font-mono text-xs text-ui-muted mt-1">{q.user}</p>
                   </div>
                   <button
-                    onClick={() => setVerified((v) => [...v, q.id])}
+                    onClick={() => setPending(q)}
                     disabled={done}
                     className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-brand-primary text-neutral-50 text-xs font-medium disabled:bg-emerald-700"
                   >
@@ -115,6 +117,16 @@ function Collector() {
           </div>
         </section>
       </main>
+
+      <ConfirmSignDialog
+        batch={pending}
+        open={pending !== null}
+        onOpenChange={(o) => !o && setPending(null)}
+        onConfirm={() => {
+          if (pending) setVerified((v) => [...v, pending.id]);
+          setPending(null);
+        }}
+      />
     </AppShell>
   );
 }
