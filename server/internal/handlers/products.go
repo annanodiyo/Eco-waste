@@ -15,10 +15,10 @@ import (
 
 type ProductHandler struct {
 	repo       *repository.ProductRepository
-	blockchain *services.BlockchainService
+	blockchain services.BlockchainServiceI
 }
 
-func NewProductHandler(repo *repository.ProductRepository, bc *services.BlockchainService) *ProductHandler {
+func NewProductHandler(repo *repository.ProductRepository, bc services.BlockchainServiceI) *ProductHandler {
 	return &ProductHandler{repo: repo, blockchain: bc}
 }
 

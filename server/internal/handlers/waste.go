@@ -15,10 +15,10 @@ import (
 type WasteHandler struct {
 	depositRepo *repository.WasteDepositRepository
 	productRepo *repository.ProductRepository
-	blockchain  *services.BlockchainService
+	blockchain  services.BlockchainServiceI
 }
 
-func NewWasteHandler(depositRepo *repository.WasteDepositRepository, productRepo *repository.ProductRepository, bc *services.BlockchainService) *WasteHandler {
+func NewWasteHandler(depositRepo *repository.WasteDepositRepository, productRepo *repository.ProductRepository, bc services.BlockchainServiceI) *WasteHandler {
 	return &WasteHandler{depositRepo: depositRepo, productRepo: productRepo, blockchain: bc}
 }
 

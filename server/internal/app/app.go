@@ -26,7 +26,7 @@ func NewApp() *App {
 	depRepo := repository.NewWasteDepositRepository(db)
 	userRepo := repository.NewUserRepository(db)
 
-	bc := &services.BlockchainService{}
+	bc := services.NewOnChainBlockchainService()
 
 	return &App{
 		handler:        handlers.NewHandler(userRepo, depRepo),
