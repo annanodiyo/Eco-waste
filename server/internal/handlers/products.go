@@ -175,3 +175,44 @@ func (h *ProductHandler) TransferOwnership(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "ownership transferred successfully", "product": product})
 }
+
+// POST /api/v1/products/scan
+func (h *ProductHandler) ScanProduct(c *gin.Context) {
+	var body struct {
+		QRData string `json:"qrData" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Decode and verify signed QR payload
+	payload, err := services.DecodeQR(body.QRData)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "QR verification failed: " + err.Error()})
+		return
+	}
+
+	product, err := h.repo.Get(payload.PID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
+
+	if product == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "product verified but not found in database registry"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "product verified successfully",
+		"productId":    product.ProductID,
+		"name":         product.Name,
+		"material":     product.MaterialName,
+		"weightGrams":  product.WeightGrams,
+		"manufacturer": product.Manufacturer,
+		"currentOwner": product.WalletAddr,
+		"registeredAt": product.RegisteredAt,
+		"txHash":       product.TxHash,
+	})
+}

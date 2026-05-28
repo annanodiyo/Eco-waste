@@ -48,6 +48,7 @@ func (a *App) routes() {
 	v1.GET("/auth/nonce", a.handler.GetNonce)
 	v1.POST("/auth/login", a.handler.Login)
 	v1.POST("/auth/register", a.handler.RegisterUser)
+	v1.POST("/vendors/register", a.handler.RegisterVendor)
 
 	// Wallet Balance & History
 	v1.GET("/wallet/balance/:address", a.handler.WalletBallance)
@@ -60,6 +61,7 @@ func (a *App) routes() {
 		// Products
 		auth.POST("/products/register", middleware.RequireRole("MANUFACTURER", "ADMIN"), a.productHandler.RegisterProduct)
 		auth.POST("/products/transfer", middleware.RequireRole("MANUFACTURER", "SELLER", "VENDOR", "ADMIN"), a.productHandler.TransferOwnership)
+		auth.POST("/products/scan", a.productHandler.ScanProduct)
 		auth.GET("/products", a.productHandler.ListProducts)
 		auth.GET("/products/:id", a.productHandler.GetProduct)
 		auth.POST("/products/decode-qr", a.productHandler.DecodeQR)

@@ -147,3 +147,55 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 		"user":  user,
 	})
 }
+
+// POST /api/v1/vendors/register
+func (h *Handler) RegisterVendor(c *gin.Context) {
+	var req struct {
+		Wallet      string `json:"wallet" binding:"required"`
+		CompanyName string `json:"companyName"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	wallet := strings.ToLower(req.Wallet)
+
+	user, err := h.userRepo.GetByWallet(wallet)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
+
+	if user != nil {
+		if err := h.userRepo.UpdateRole(wallet, "VENDOR"); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update role: " + err.Error()})
+			return
+		}
+		user.Role = "VENDOR"
+	} else {
+		user = &models.User{
+			Wallet:    wallet,
+			Role:      "VENDOR",
+			CreatedAt: time.Now(),
+		}
+		if err := h.userRepo.Create(user); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create vendor: " + err.Error()})
+			return
+		}
+	}
+
+	// Generate JWT session token
+	token, err := services.GenerateJWTToken(user.Wallet, user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate session: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Vendor registered successfully",
+		"token":   token,
+		"role":    user.Role,
+		"user":    user,
+	})
+}
