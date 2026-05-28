@@ -1,36 +1,29 @@
 package services
 
-import ("os"
-"github.com/ethereum/go-ethereum/ethclient"
-"fmt"
-"log"
-// "github.com/annanodiyo/Eco-waste/server/internal/services"
-	// "log"
-	// "fmt"
-	"context"
-    "github.com/joho/godotenv")
+import "fmt"
 
-func NewClient() (*ethclient.Client, error){
+// BlockchainService is a mock — swap for a real on-chain client later.
+type BlockchainService struct{}
 
-	args := os.Getenv("RPC_URL")
-	fmt.Println("user")
-	fmt.Println(args)
-	client, err := ethclient.Dial(args)
-return client, err
+func (b *BlockchainService) RegisterProductOnChain(
+	productID, name string,
+	material uint8,
+	weight interface{},
+	manufacturer string,
+) (string, error) {
+	return fmt.Sprintf("mock-tx-register-%s", productID), nil
 }
 
-func Retrieve(){
-	if err := godotenv.Load(); err != nil {
-    log.Fatal("Error loading .env file")
-}	
-client, err := NewClient()
-	if err != nil {
-		log.Fatalf("Error occured: %v", err)
-	}
-header, err := client.HeaderByNumber(context.Background(), nil)
-if err != nil {
-    log.Fatalf("Could not get block: %v", err)
+func (b *BlockchainService) DepositWasteOnChain(
+	productID string,
+	hasQR bool,
+	depositorAddr [20]byte,
+	wasteType uint8,
+	weight interface{},
+) (string, error) {
+	return fmt.Sprintf("mock-tx-deposit-%s", productID), nil
 }
-fmt.Println("Latest block:", header.Number)
-	// NewClient()
+
+func (b *BlockchainService) ConfirmRecyclingOnChain(depositID interface{}) (string, error) {
+	return "mock-tx-confirm", nil
 }
