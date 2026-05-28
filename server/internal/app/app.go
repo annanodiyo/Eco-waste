@@ -1,28 +1,33 @@
 package app
 
 import (
+	"github.com/annanodiyo/Eco-waste/server/internal/database"
 	"github.com/annanodiyo/Eco-waste/server/internal/handlers"
 	"github.com/annanodiyo/Eco-waste/server/internal/middleware"
-	"github.com/annanodiyo/Eco-waste/server/internal/models"
+	"github.com/annanodiyo/Eco-waste/server/internal/repository"
 	"github.com/annanodiyo/Eco-waste/server/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
 type App struct {
-	store          *models.Store
 	wasteHandler   *handlers.WasteHandler
 	productHandler *handlers.ProductHandler
 	router         *gin.Engine
 }
 
 func NewApp() *App {
-	store := models.NewStore()
+	// Initialize database
+	db := database.InitDB()
+
+	// Instantiate repositories
+	prodRepo := repository.NewProductRepository(db)
+	depRepo := repository.NewWasteDepositRepository(db)
+
 	bc := &services.BlockchainService{}
 
 	return &App{
-		store:          store,
-		wasteHandler:   handlers.NewWasteHandler(store, bc),
-		productHandler: handlers.NewProductHandler(store, bc),
+		wasteHandler:   handlers.NewWasteHandler(depRepo, prodRepo, bc),
+		productHandler: handlers.NewProductHandler(prodRepo, bc),
 		router:         gin.New(),
 	}
 }

@@ -6,18 +6,19 @@ import (
 	"time"
 
 	"github.com/annanodiyo/Eco-waste/server/internal/models"
+	"github.com/annanodiyo/Eco-waste/server/internal/repository"
 	"github.com/annanodiyo/Eco-waste/server/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type ProductHandler struct {
-	store      *models.Store
+	repo       *repository.ProductRepository
 	blockchain *services.BlockchainService
 }
 
-func NewProductHandler(store *models.Store, bc *services.BlockchainService) *ProductHandler {
-	return &ProductHandler{store: store, blockchain: bc}
+func NewProductHandler(repo *repository.ProductRepository, bc *services.BlockchainService) *ProductHandler {
+	return &ProductHandler{repo: repo, blockchain: bc}
 }
 
 // POST /api/v1/products/register
@@ -66,15 +67,22 @@ func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 		QRCode:       qrBase64,
 	}
 
-	h.store.AddProduct(product)
+	if err := h.repo.Create(product); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to store product: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, product)
 }
 
 // GET /api/v1/products/:id
 func (h *ProductHandler) GetProduct(c *gin.Context) {
 	id := c.Param("id")
-	product, ok := h.store.GetProduct(id)
-	if !ok {
+	product, err := h.repo.Get(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
+	if product == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
 		return
 	}
@@ -83,7 +91,11 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 
 // GET /api/v1/products
 func (h *ProductHandler) ListProducts(c *gin.Context) {
-	products := h.store.GetAllProducts()
+	products, err := h.repo.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"products": products, "total": len(products)})
 }
 
@@ -103,8 +115,13 @@ func (h *ProductHandler) DecodeQR(c *gin.Context) {
 		return
 	}
 
-	product, ok := h.store.GetProduct(payload.ProductID)
-	if ok {
+	product, err := h.repo.Get(payload.ProductID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
+
+	if product != nil {
 		c.JSON(http.StatusOK, gin.H{"payload": payload, "product": product, "found": true})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"payload": payload, "found": false})

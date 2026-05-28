@@ -7,17 +7,19 @@ import (
 	"time"
 
 	"github.com/annanodiyo/Eco-waste/server/internal/models"
+	"github.com/annanodiyo/Eco-waste/server/internal/repository"
 	"github.com/annanodiyo/Eco-waste/server/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
 type WasteHandler struct {
-	store      *models.Store
-	blockchain *services.BlockchainService
+	depositRepo *repository.WasteDepositRepository
+	productRepo *repository.ProductRepository
+	blockchain  *services.BlockchainService
 }
 
-func NewWasteHandler(store *models.Store, bc *services.BlockchainService) *WasteHandler {
-	return &WasteHandler{store: store, blockchain: bc}
+func NewWasteHandler(depositRepo *repository.WasteDepositRepository, productRepo *repository.ProductRepository, bc *services.BlockchainService) *WasteHandler {
+	return &WasteHandler{depositRepo: depositRepo, productRepo: productRepo, blockchain: bc}
 }
 
 // POST /api/v1/waste/deposit
@@ -32,8 +34,12 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 
 	// If QR scan, look up product to get correct waste type.
 	if req.HasQR && req.ProductID != "" {
-		product, ok := h.store.GetProduct(req.ProductID)
-		if !ok {
+		product, err := h.productRepo.Get(req.ProductID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+			return
+		}
+		if product == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "product not found — is it registered?"})
 			return
 		}
@@ -67,8 +73,10 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 		Timestamp:     time.Now(),
 	}
 
-	id := h.store.AddDeposit(deposit)
-	deposit.ID = id
+	if err := h.depositRepo.Create(deposit); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to store deposit: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, deposit)
 }
 
@@ -80,8 +88,12 @@ func (h *WasteHandler) ConfirmRecycling(c *gin.Context) {
 		return
 	}
 
-	deposit, ok := h.store.GetDeposit(req.DepositID)
-	if !ok {
+	deposit, err := h.depositRepo.Get(req.DepositID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
+	if deposit == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "deposit not found"})
 		return
 	}
@@ -101,14 +113,21 @@ func (h *WasteHandler) ConfirmRecycling(c *gin.Context) {
 	deposit.StatusName = models.StatusRecycled.String()
 	deposit.RecycledAt = &now
 	deposit.TxHash = txHash
-	h.store.UpdateDeposit(deposit)
+	if err := h.depositRepo.Update(deposit); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update deposit: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, deposit)
 }
 
 // GET /api/v1/waste/depositor/:address
 func (h *WasteHandler) GetDepositorHistory(c *gin.Context) {
 	addr := c.Param("address")
-	deposits := h.store.GetDepositsByDepositor(addr)
+	deposits, err := h.depositRepo.GetByDepositor(addr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
 	totalTokens := 0
 	for _, d := range deposits {
 		totalTokens += d.TokensEarned
@@ -122,13 +141,21 @@ func (h *WasteHandler) GetDepositorHistory(c *gin.Context) {
 
 // GET /api/v1/waste/pending
 func (h *WasteHandler) GetPendingDeposits(c *gin.Context) {
-	deposits := h.store.GetPendingDeposits()
+	deposits, err := h.depositRepo.GetPending()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"deposits": deposits, "total": len(deposits)})
 }
 
 // GET /api/v1/waste/all
 func (h *WasteHandler) GetAllDeposits(c *gin.Context) {
-	deposits := h.store.GetAllDeposits()
+	deposits, err := h.depositRepo.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"deposits": deposits, "total": len(deposits)})
 }
 
@@ -140,8 +167,12 @@ func (h *WasteHandler) GetDeposit(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid deposit id"})
 		return
 	}
-	deposit, ok := h.store.GetDeposit(id)
-	if !ok {
+	deposit, err := h.depositRepo.Get(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
+	if deposit == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "deposit not found"})
 		return
 	}
