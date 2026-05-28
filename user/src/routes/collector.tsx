@@ -232,15 +232,6 @@ function Collector() {
         </section>
       </main>
 
-      <ConfirmSignDialog
-        batch={pending}
-        open={pending !== null}
-        onOpenChange={(o) => !o && setPending(null)}
-        onConfirm={() => {
-          if (pending) setVerified((v) => [...v, pending.id]);
-          setPending(null);
-        }}
-      />
     </AppShell>
   );
 }
