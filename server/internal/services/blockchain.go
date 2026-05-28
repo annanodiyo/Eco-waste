@@ -18,6 +18,10 @@ func (b *BlockchainService) TransferOwnershipOnChain(productID string, newOwner 
 	return fmt.Sprintf("mock-tx-transfer-%s-to-%s", productID, newOwner), nil
 }
 
+func (b *BlockchainService) RegisterVendorOnChain(wallet string) (string, error) {
+	return fmt.Sprintf("mock-tx-register-vendor-%s", wallet), nil
+}
+
 func (b *BlockchainService) DepositWasteOnChain(
 	productID string,
 	hasQR bool,

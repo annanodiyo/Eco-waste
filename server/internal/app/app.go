@@ -13,6 +13,7 @@ type App struct {
 	handler        *handlers.Handler
 	wasteHandler   *handlers.WasteHandler
 	productHandler *handlers.ProductHandler
+	statsHandler   *handlers.StatsHandler
 	router         *gin.Engine
 }
 
@@ -31,6 +32,7 @@ func NewApp() *App {
 		handler:        handlers.NewHandler(userRepo, depRepo),
 		wasteHandler:   handlers.NewWasteHandler(depRepo, prodRepo, bc),
 		productHandler: handlers.NewProductHandler(prodRepo, bc),
+		statsHandler:   handlers.NewStatsHandler(depRepo, userRepo),
 		router:         gin.New(),
 	}
 }
@@ -53,6 +55,9 @@ func (a *App) routes() {
 	// Wallet Balance & History
 	v1.GET("/wallet/balance/:address", a.handler.WalletBallance)
 	v1.GET("/wallet/history/:address", a.handler.ConsumerHistory)
+
+	// Public Stats
+	v1.GET("/stats", a.statsHandler.GetStats)
 
 	// Authenticated routes group
 	auth := v1.Group("")
