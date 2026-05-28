@@ -1,27 +1,72 @@
 import { useEffect, useState } from "react";
-import { X, ScanLine } from "lucide-react";
+import { X, ScanLine, Loader2, CheckCircle2 } from "lucide-react";
 import { useWallet } from "@/lib/wallet";
-import { PRODUCTS } from "@/lib/mockData";
+import { TxHash } from "@/components/TxHash";
+import { depositWaste, decodeQR, type WasteDeposit } from "@/lib/api/ecoApi";
 
 export function QrScanModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { addReward } = useWallet();
-  const [phase, setPhase] = useState<"scanning" | "found" | "rewarded">("scanning");
+  const { address, refreshBalance } = useWallet();
+  const [phase, setPhase] = useState<"scanning" | "found" | "confirming" | "rewarded" | "error">(
+    "scanning",
+  );
+  const [scannedData, setScannedData] = useState<{
+    productId: string;
+    name: string;
+    material: number;
+    weightGrams: number;
+    manufacturer: string;
+  } | null>(null);
+  const [deposit, setDeposit] = useState<WasteDeposit | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!open) return;
     setPhase("scanning");
-    const t1 = setTimeout(() => setPhase("found"), 1800);
+    setScannedData(null);
+    setDeposit(null);
+    setErrorMsg("");
+
+    // Simulate a QR scan (in a real app, use camera/QR scanner library).
+    // For now, simulate finding a product after a brief delay.
+    const t1 = setTimeout(() => {
+      // Use a demo payload — in production this comes from the device camera
+      setScannedData({
+        productId: "",
+        name: "Manual Drop-off",
+        material: 0,
+        weightGrams: 250,
+        manufacturer: "Unknown",
+      });
+      setPhase("found");
+    }, 1800);
     return () => clearTimeout(t1);
   }, [open]);
 
   if (!open) return null;
-  const product = PRODUCTS[0];
 
-  const confirm = () => {
-    addReward(product.tokenReward);
-    setPhase("rewarded");
-    setTimeout(onClose, 1400);
+  const confirm = async () => {
+    if (!address) return;
+    setPhase("confirming");
+    try {
+      const result = await depositWaste({
+        productId: scannedData?.productId ?? "",
+        hasQr: !!scannedData?.productId,
+        depositorAddr: address,
+        collectorAddr: address, // In a real app, this would be the collector's address
+        wasteType: (scannedData?.material ?? 0) as 0 | 1 | 2 | 3 | 4 | 5 | 6,
+        weightGrams: scannedData?.weightGrams ?? 250,
+      });
+      setDeposit(result);
+      setPhase("rewarded");
+      refreshBalance();
+      setTimeout(onClose, 2000);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Drop-off failed");
+      setPhase("error");
+    }
   };
+
+  const materialLabels = ["Plastic", "Glass", "Metal", "Paper", "Organic", "Electronic", "Other"];
 
   return (
     <div className="fixed inset-0 z-[100] bg-ui-dark/80 backdrop-blur-sm grid place-items-center px-4 animate-fade-up">
@@ -49,7 +94,30 @@ export function QrScanModal({ open, onClose }: { open: boolean; onClose: () => v
             {phase === "scanning" ? (
               <div className="flex flex-col items-center gap-2 text-neutral-400">
                 <ScanLine className="size-10 text-brand-accent/60" />
-                <span className="font-mono text-[10px] uppercase tracking-widest">Locating item…</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest">
+                  Locating item…
+                </span>
+              </div>
+            ) : phase === "confirming" ? (
+              <div className="flex flex-col items-center gap-2 text-neutral-400">
+                <Loader2 className="size-10 text-brand-accent/60 animate-spin" />
+                <span className="font-mono text-[10px] uppercase tracking-widest">
+                  Sending to blockchain…
+                </span>
+              </div>
+            ) : phase === "rewarded" ? (
+              <div className="text-center px-6">
+                <div className="size-12 mx-auto rounded-full bg-brand-accent/20 grid place-items-center ring-2 ring-brand-accent/40">
+                  <CheckCircle2 className="size-6 text-brand-accent" />
+                </div>
+                <p className="mt-3 text-neutral-50 font-medium">
+                  +{deposit?.tokensEarned} $ECO minted!
+                </p>
+                {deposit && (
+                  <div className="mt-2">
+                    <TxHash hash={deposit.txHash} />
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center px-6">
@@ -57,37 +125,61 @@ export function QrScanModal({ open, onClose }: { open: boolean; onClose: () => v
                   <div className="size-3 bg-brand-accent rounded-full" />
                 </div>
                 <p className="mt-3 text-neutral-300 font-mono text-[10px] uppercase tracking-widest">
-                  Item ID #{product.id}
+                  {scannedData?.productId
+                    ? `Product #${scannedData.productId.slice(0, 8)}…`
+                    : "Manual entry"}
                 </p>
-                <p className="text-neutral-50 font-medium mt-1">{product.name}</p>
+                <p className="text-neutral-50 font-medium mt-1">
+                  {scannedData?.name ?? "Unknown item"}
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {phase !== "scanning" && (
+        {(phase === "found" || phase === "error") && scannedData && (
           <div className="px-5 py-4 space-y-3">
             <div className="flex justify-between text-xs">
               <span className="text-ui-muted">Material</span>
-              <span className="font-mono">{product.material}</span>
+              <span className="font-mono">
+                {materialLabels[scannedData.material] ?? "Unknown"}
+              </span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-ui-muted">Weight</span>
-              <span className="font-mono">{product.weightKg.toFixed(3)} kg</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-ui-muted">Reward (vendor)</span>
-              <span className="font-mono text-brand-secondary font-semibold">
-                +{product.tokenReward.toFixed(2)} $ECO
+              <span className="font-mono">
+                {(scannedData.weightGrams / 1000).toFixed(3)} kg
               </span>
             </div>
+
+            {phase === "error" && (
+              <div className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">
+                {errorMsg}
+              </div>
+            )}
+
             <button
-              disabled={phase === "rewarded"}
               onClick={confirm}
+              disabled={phase !== "found" && phase !== "error"}
               className="w-full py-3 rounded-[10px] bg-brand-primary text-neutral-50 text-sm font-medium active:scale-98 transition-transform disabled:bg-emerald-700"
             >
-              {phase === "rewarded" ? "Reward minted ✓" : "Confirm drop-off"}
+              {phase === "error" ? "Retry drop-off" : "Confirm drop-off"}
             </button>
+          </div>
+        )}
+
+        {phase === "rewarded" && deposit && (
+          <div className="px-5 py-4 space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="text-ui-muted">Tokens earned</span>
+              <span className="font-mono text-brand-secondary font-semibold">
+                +{deposit.tokensEarned} $ECO
+              </span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-ui-muted">Deposit ID</span>
+              <span className="font-mono">#{deposit.id}</span>
+            </div>
           </div>
         )}
       </div>
