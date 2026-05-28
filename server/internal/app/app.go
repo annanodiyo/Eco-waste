@@ -10,6 +10,7 @@ import (
 )
 
 type App struct {
+	handler        *handlers.Handler
 	wasteHandler   *handlers.WasteHandler
 	productHandler *handlers.ProductHandler
 	router         *gin.Engine
@@ -22,10 +23,12 @@ func NewApp() *App {
 	// Instantiate repositories
 	prodRepo := repository.NewProductRepository(db)
 	depRepo := repository.NewWasteDepositRepository(db)
+	userRepo := repository.NewUserRepository(db)
 
 	bc := &services.BlockchainService{}
 
 	return &App{
+		handler:        handlers.NewHandler(userRepo, depRepo),
 		wasteHandler:   handlers.NewWasteHandler(depRepo, prodRepo, bc),
 		productHandler: handlers.NewProductHandler(prodRepo, bc),
 		router:         gin.New(),
@@ -40,6 +43,15 @@ func (a *App) middlewares() {
 
 func (a *App) routes() {
 	v1 := a.router.Group("/api/v1")
+
+	// Authentication & Roles
+	v1.GET("/auth/nonce", a.handler.GetNonce)
+	v1.POST("/auth/login", a.handler.Login)
+	v1.POST("/auth/register", a.handler.RegisterUser)
+
+	// Wallet Balance & History
+	v1.GET("/wallet/balance/:address", a.handler.WalletBallance)
+	v1.GET("/wallet/history/:address", a.handler.ConsumerHistory)
 
 	// Products
 	v1.POST("/products/register", a.productHandler.RegisterProduct)
