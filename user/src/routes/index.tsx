@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, ScanLine, MapPin, Boxes, Recycle, Factory, Store, Truck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ChainBadge } from "@/components/ChainBadge";
+import { RoleGateway } from "@/components/RoleGateway";
 import { STAGES, PRODUCTS } from "@/lib/mockData";
 import proofImg from "@/assets/proof.jpg";
 
@@ -55,13 +56,13 @@ function Landing() {
             ledger event. Scan, drop off, and earn $ECO. No greenwashing. No double-counting.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              to="/consumer"
+            <a
+              href="#choose-role"
               className="inline-flex items-center gap-2 bg-ui-dark text-neutral-50 px-5 py-3 rounded-full text-sm font-medium hover:bg-brand-primary transition-colors"
             >
-              Open Consumer Wallet
+              Choose your role
               <ArrowUpRight className="size-4" />
-            </Link>
+            </a>
             <Link
               to="/journey/$itemId"
               params={{ itemId: PRODUCTS[0].id }}
@@ -71,6 +72,9 @@ function Landing() {
             </Link>
           </div>
         </section>
+
+        {/* Role gateway */}
+        <RoleGateway />
 
         {/* Chain scroller */}
         <section className="pt-4 pb-12">
@@ -176,10 +180,10 @@ function Landing() {
                 a final cryptographic stamp — paid in tokens by the vendor.
               </p>
               <div className="flex gap-6 pt-4">
-                <RoleLink to="/consumer" label="Consumer" />
-                <RoleLink to="/collector" label="Collector" />
-                <RoleLink to="/recycler" label="Recycler" />
-                <RoleLink to="/manufacturer" label="Manufacturer" />
+                <RoleLink label="Consumer" />
+                <RoleLink label="Collector" />
+                <RoleLink label="Recycler" />
+                <RoleLink label="Manufacturer" />
               </div>
             </div>
           </div>
@@ -207,13 +211,13 @@ function Landing() {
   );
 }
 
-function RoleLink({ to, label }: { to: string; label: string }) {
+function RoleLink({ label }: { label: string }) {
   return (
-    <Link
-      to={to}
+    <a
+      href="#choose-role"
       className="text-xs font-mono uppercase tracking-widest text-ui-dark border-b border-ui-dark/20 hover:text-brand-primary hover:border-brand-primary pb-0.5"
     >
       {label} →
-    </Link>
+    </a>
   );
 }
