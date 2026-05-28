@@ -16,7 +16,7 @@ type App struct {
 }
 
 func NewApp() *App {
-	store := models.NewStore()
+	store := models.NewStore("data.json")
 	bc := &services.BlockchainService{}
 
 	return &App{

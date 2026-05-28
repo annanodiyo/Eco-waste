@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/annanodiyo/Eco-waste/server/internal/models"
@@ -60,7 +61,7 @@ func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 		MaterialName: req.Material.String(),
 		WeightGrams:  req.WeightGrams,
 		Manufacturer: req.Manufacturer,
-		WalletAddr:   req.WalletAddr,
+		WalletAddr:   strings.ToLower(req.WalletAddr),
 		RegisteredAt: time.Now(),
 		TxHash:       txHash,
 		QRCode:       qrBase64,

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+	"os"
 	"sync"
 	"time"
 )
@@ -130,13 +132,65 @@ type Store struct {
 	deposits   map[uint64]*WasteDeposit
 	products   map[string]*Product
 	nextID     uint64
+	dbPath     string
 }
 
-func NewStore() *Store {
-	return &Store{
+func NewStore(dbPath string) *Store {
+	s := &Store{
 		deposits: make(map[uint64]*WasteDeposit),
 		products: make(map[string]*Product),
 		nextID:   1,
+		dbPath:   dbPath,
+	}
+	s.LoadFromFile()
+	return s
+}
+
+type storeData struct {
+	Deposits []*WasteDeposit `json:"deposits"`
+	Products []*Product      `json:"products"`
+	NextID   uint64          `json:"nextId"`
+}
+
+func (s *Store) SaveToFile() {
+	if s.dbPath == "" {
+		return
+	}
+	data := storeData{
+		NextID: s.nextID,
+	}
+	for _, d := range s.deposits {
+		data.Deposits = append(data.Deposits, d)
+	}
+	for _, p := range s.products {
+		data.Products = append(data.Products, p)
+	}
+
+	b, _ := json.MarshalIndent(data, "", "  ")
+	_ = os.WriteFile(s.dbPath, b, 0644)
+}
+
+func (s *Store) LoadFromFile() {
+	if s.dbPath == "" {
+		return
+	}
+	b, err := os.ReadFile(s.dbPath)
+	if err != nil {
+		return
+	}
+	var data storeData
+	if err := json.Unmarshal(b, &data); err != nil {
+		return
+	}
+	s.nextID = data.NextID
+	if s.nextID == 0 {
+		s.nextID = 1
+	}
+	for _, d := range data.Deposits {
+		s.deposits[d.ID] = d
+	}
+	for _, p := range data.Products {
+		s.products[p.ProductID] = p
 	}
 }
 
@@ -149,6 +203,7 @@ func (s *Store) AddDeposit(d *WasteDeposit) uint64 {
 	s.nextID++
 	d.ID = id
 	s.deposits[id] = d
+	s.SaveToFile()
 	return id
 }
 
@@ -163,6 +218,7 @@ func (s *Store) UpdateDeposit(d *WasteDeposit) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.deposits[d.ID] = d
+	s.SaveToFile()
 }
 
 func (s *Store) GetAllDeposits() []*WasteDeposit {
@@ -205,6 +261,7 @@ func (s *Store) AddProduct(p *Product) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.products[p.ProductID] = p
+	s.SaveToFile()
 }
 
 func (s *Store) GetProduct(id string) (*Product, bool) {

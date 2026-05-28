@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/annanodiyo/Eco-waste/server/internal/models"
@@ -27,6 +28,8 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	req.DepositorAddr = strings.ToLower(req.DepositorAddr)
 
 	wasteType := req.WasteType
 
@@ -107,7 +110,7 @@ func (h *WasteHandler) ConfirmRecycling(c *gin.Context) {
 
 // GET /api/v1/waste/depositor/:address
 func (h *WasteHandler) GetDepositorHistory(c *gin.Context) {
-	addr := c.Param("address")
+	addr := strings.ToLower(c.Param("address"))
 	deposits := h.store.GetDepositsByDepositor(addr)
 	totalTokens := 0
 	for _, d := range deposits {
