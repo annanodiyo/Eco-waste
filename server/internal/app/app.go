@@ -53,19 +53,24 @@ func (a *App) routes() {
 	v1.GET("/wallet/balance/:address", a.handler.WalletBallance)
 	v1.GET("/wallet/history/:address", a.handler.ConsumerHistory)
 
-	// Products
-	v1.POST("/products/register", a.productHandler.RegisterProduct)
-	v1.GET("/products", a.productHandler.ListProducts)
-	v1.GET("/products/:id", a.productHandler.GetProduct)
-	v1.POST("/products/decode-qr", a.productHandler.DecodeQR)
+	// Authenticated routes group
+	auth := v1.Group("")
+	auth.Use(middleware.AuthRequired())
+	{
+		// Products
+		auth.POST("/products/register", middleware.RequireRole("MANUFACTURER", "ADMIN"), a.productHandler.RegisterProduct)
+		auth.GET("/products", a.productHandler.ListProducts)
+		auth.GET("/products/:id", a.productHandler.GetProduct)
+		auth.POST("/products/decode-qr", a.productHandler.DecodeQR)
 
-	// Waste
-	v1.POST("/waste/deposit", a.wasteHandler.CreateDeposit)
-	v1.POST("/waste/confirm-recycling", a.wasteHandler.ConfirmRecycling)
-	v1.GET("/waste/depositor/:address", a.wasteHandler.GetDepositorHistory)
-	v1.GET("/waste/pending", a.wasteHandler.GetPendingDeposits)
-	v1.GET("/waste/all", a.wasteHandler.GetAllDeposits)
-	v1.GET("/waste/:id", a.wasteHandler.GetDeposit)
+		// Waste
+		auth.POST("/waste/deposit", middleware.RequireRole("COLLECTOR", "VENDOR", "SELLER", "ADMIN"), a.wasteHandler.CreateDeposit)
+		auth.POST("/waste/confirm-recycling", middleware.RequireRole("RECYCLER", "ADMIN"), a.wasteHandler.ConfirmRecycling)
+		auth.GET("/waste/depositor/:address", a.wasteHandler.GetDepositorHistory)
+		auth.GET("/waste/pending", a.wasteHandler.GetPendingDeposits)
+		auth.GET("/waste/all", a.wasteHandler.GetAllDeposits)
+		auth.GET("/waste/:id", a.wasteHandler.GetDeposit)
+	}
 }
 
 func (a *App) run() {
