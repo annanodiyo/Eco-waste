@@ -1,0 +1,80 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * EcoToken design tokens — "Horizontal logistics ledger" direction.
+ * Geist + Geist Mono, emerald primary, neutral surfaces, zinc dark.
+ */
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-primary: #065f46;
+  --color-brand-secondary: #047857;
+  --color-brand-accent: #10b981;
+
+  --color-surface: #fafafa;
+  --color-ui-dark: #18181b;
+  --color-ui-muted: #71717a;
+  --color-ui-border: rgba(0, 0, 0, 0.06);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-card: var(--card);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #fafafa;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: rgba(0, 0, 0, 0.08);
+  --primary: #065f46;
+  --primary-foreground: #fafafa;
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .font-mono { font-family: var(--font-mono); }
+}
+
+@keyframes scanLine {
+  0% { transform: translateY(0%); }
+  100% { transform: translateY(100%); }
+}
+.animate-scan { animation: scanLine 2s linear infinite; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
