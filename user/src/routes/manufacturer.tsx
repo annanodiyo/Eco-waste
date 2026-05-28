@@ -9,8 +9,6 @@ export const Route = createFileRoute("/manufacturer")({
   component: Manufacturer,
 });
 
-// ── API config ────────────────────────────────────────────────────────────────
-
 const API = "http://localhost:8080/api/v1";
 
 const MATERIAL_OPTIONS: { label: string; value: number }[] = [
@@ -23,7 +21,6 @@ const MATERIAL_OPTIONS: { label: string; value: number }[] = [
   { label: "Other",             value: 6 },
 ];
 
-// FIX 3: define WASTE_TYPE_LABELS (was used but never declared)
 const WASTE_TYPE_LABELS: Record<number, string> = {
   0: "PET Plastic",
   1: "Glass",
@@ -37,9 +34,6 @@ const WASTE_TYPE_LABELS: Record<number, string> = {
 const RATES: Record<number, number> = {
   0: 0.10, 1: 0.05, 2: 0.15, 3: 0.08, 4: 0.03, 5: 0.20, 6: 0.02,
 };
-
-// ── FIX 1 & 2: replace useWallet hook + shortAddr with a simple local impl ───
-// Swap this out for your real wallet library (wagmi, ethers, etc.) when ready.
 
 function useWallet() {
   const [address, setAddress] = useState<string | null>(null);
@@ -55,7 +49,6 @@ function useWallet() {
     }
   }, []);
 
-  // Auto-reconnect if already permitted
   useEffect(() => {
     const eth = (window as any).ethereum;
     if (!eth) return;
@@ -67,18 +60,14 @@ function useWallet() {
   return { address, connect };
 }
 
-// FIX 2: shortAddr was called but never defined
 function shortAddr(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
-// ── TxHash display helper (was referenced in broken table block) ──────────────
 function TxHash({ hash }: { hash: string }) {
   const display = hash.startsWith("mock") ? "mock-chain" : `${hash.slice(0, 8)}…`;
   return <span className="font-mono text-xs text-ui-muted">{display}</span>;
 }
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 interface Product {
   productId:    string;
@@ -93,10 +82,7 @@ interface Product {
   qrCode:       string;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 function Manufacturer() {
-  // FIX 1: useWallet is now defined above — no missing import
   const { address, connect } = useWallet();
 
   const [form, setForm] = useState({
@@ -109,10 +95,10 @@ function Manufacturer() {
   });
 
   const [registeredProduct, setRegisteredProduct] = useState<Product | null>(null);
-  const [batches, setBatches]                     = useState<Product[]>([]);
-  const [status, setStatus]                       = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg]                   = useState("");
-  const [batchesLoading, setBatchesLoading]       = useState(false);
+  const [batches, setBatches]               = useState<Product[]>([]);
+  const [status, setStatus]                 = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg]             = useState("");
+  const [batchesLoading, setBatchesLoading] = useState(false);
 
   const fetchBatches = useCallback(async () => {
     setBatchesLoading(true);
@@ -190,7 +176,6 @@ function Manufacturer() {
           )}
         </header>
 
-        {/* Register batch */}
         <section className="grid md:grid-cols-2 gap-4">
           <div className="bg-card ring-1 ring-black/5 rounded-[16px] p-6 space-y-4">
             <h2 className="text-xs font-mono uppercase tracking-widest text-ui-muted">
@@ -239,7 +224,6 @@ function Manufacturer() {
             <div className="flex items-center justify-between pt-2">
               <p className="text-xs text-ui-muted">
                 Material:{" "}
-                {/* FIX 3: WASTE_TYPE_LABELS is now defined */}
                 <span className="font-mono font-semibold">{WASTE_TYPE_LABELS[form.material]}</span>
                 {" · "}
                 <span className="font-mono text-brand-secondary font-semibold">+{reward} $ECO</span>
@@ -292,7 +276,6 @@ function Manufacturer() {
           </div>
         </section>
 
-        {/* Registered products table */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-mono uppercase tracking-widest text-ui-muted">
@@ -318,7 +301,6 @@ function Manufacturer() {
                   ))}
                 </tr>
               </thead>
-              {/* FIX 4: removed the broken ternary / stray `products` reference — single clean .map() */}
               <tbody className="divide-y divide-zinc-100">
                 {batchesLoading && (
                   <tr>
@@ -352,7 +334,6 @@ function Manufacturer() {
           </div>
         </section>
 
-        {/* Compliance stats */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { v: `${batches.length}`,  l: "Products registered" },
@@ -370,8 +351,6 @@ function Manufacturer() {
     </AppShell>
   );
 }
-
-// ── Field ─────────────────────────────────────────────────────────────────────
 
 function Field({
   label, value, onChange, type = "text", textarea = false,

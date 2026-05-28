@@ -30,7 +30,7 @@ func NewApp() *App {
 func (a *App) middlewares() {
 	a.router.Use(gin.Logger())
 	a.router.Use(gin.Recovery())
-	middleware.Cors(a.router) // fixed: was `m.Cors(a.router)` with undefined `m`
+	middleware.Cors(a.router)
 }
 
 func (a *App) routes() {
