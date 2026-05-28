@@ -50,7 +50,8 @@ func (s DepositStatus) String() string {
 // ── Domain models ─────────────────────────────────────────────────────────────
 
 type Product struct {
-	ProductID    string    `json:"productId"`
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	ProductID    string    `gorm:"uniqueIndex;not null" json:"productId"`
 	Name         string    `json:"name"`
 	Material     WasteType `json:"material"`
 	MaterialName string    `json:"materialName"`
@@ -59,11 +60,11 @@ type Product struct {
 	WalletAddr   string    `json:"walletAddr"`
 	RegisteredAt time.Time `json:"registeredAt"`
 	TxHash       string    `json:"txHash"`
-	QRCode       string    `json:"qrCode"`
+	QRCode       string    `gorm:"type:text" json:"qrCode"`
 }
 
 type WasteDeposit struct {
-	ID            uint64        `json:"id"`
+	ID            uint64        `gorm:"primaryKey" json:"id"`
 	ProductID     string        `json:"productId"`
 	HasQR         bool          `json:"hasQr"`
 	DepositorAddr string        `json:"depositorAddr"`
@@ -77,6 +78,13 @@ type WasteDeposit struct {
 	TxHash        string        `json:"txHash"`
 	Timestamp     time.Time     `json:"timestamp"`
 	RecycledAt    *time.Time    `json:"recycledAt,omitempty"`
+}
+
+type User struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Wallet    string    `gorm:"uniqueIndex;not null" json:"wallet"`
+	Role      string    `gorm:"not null" json:"role"` // MANUFACTURER, SELLER, COLLECTOR, RECYCLER, ADMIN, CONSUMER
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // ── Request DTOs ──────────────────────────────────────────────────────────────
