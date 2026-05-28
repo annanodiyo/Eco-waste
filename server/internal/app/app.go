@@ -73,6 +73,10 @@ func (a *App) routes() {
 		auth.GET("/waste/pending", a.wasteHandler.GetPendingDeposits)
 		auth.GET("/waste/all", a.wasteHandler.GetAllDeposits)
 		auth.GET("/waste/:id", a.wasteHandler.GetDeposit)
+
+		// Recycler Dashboard
+		auth.GET("/recycler/pending", middleware.RequireRole("RECYCLER", "ADMIN"), a.wasteHandler.GetPendingDeposits)
+		auth.POST("/recycler/process", middleware.RequireRole("RECYCLER", "ADMIN"), a.wasteHandler.ProcessRecyclingBatch)
 	}
 }
 

@@ -178,3 +178,59 @@ func (h *WasteHandler) GetDeposit(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, deposit)
 }
+
+// POST /api/v1/recycler/process
+func (h *WasteHandler) ProcessRecyclingBatch(c *gin.Context) {
+	var req struct {
+		DepositIDs []uint64 `json:"depositIds" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var processedList []uint64
+	var failedList []string
+
+	now := time.Now()
+
+	for _, id := range req.DepositIDs {
+		deposit, err := h.depositRepo.Get(id)
+		if err != nil {
+			failedList = append(failedList, fmt.Sprintf("ID %d: database error: %v", id, err))
+			continue
+		}
+		if deposit == nil {
+			failedList = append(failedList, fmt.Sprintf("ID %d: not found", id))
+			continue
+		}
+		if deposit.Status == models.StatusRecycled {
+			failedList = append(failedList, fmt.Sprintf("ID %d: already recycled", id))
+			continue
+		}
+
+		// Call blockchain mock/real recycler batch confirm function
+		txHash, err := h.blockchain.ConfirmRecyclingOnChain(id)
+		if err != nil {
+			fmt.Printf("blockchain recycler confirm error for ID %d (non-fatal): %v\n", id, err)
+			txHash = "pending-recycle-confirm"
+		}
+
+		deposit.Status = models.StatusRecycled
+		deposit.StatusName = models.StatusRecycled.String()
+		deposit.RecycledAt = &now
+		deposit.TxHash = txHash
+
+		if err := h.depositRepo.Update(deposit); err != nil {
+			failedList = append(failedList, fmt.Sprintf("ID %d: update error: %v", id, err))
+			continue
+		}
+		processedList = append(processedList, id)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "recycling batch processed",
+		"processed": processedList,
+		"failures":  failedList,
+	})
+}
