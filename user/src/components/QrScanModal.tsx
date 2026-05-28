@@ -50,7 +50,6 @@ export function QrScanModal({
       // ignore
     }
     controlsRef.current = null;
-    readerRef.current?.reset?.();
     readerRef.current = null;
 
     const v = videoRef.current;
