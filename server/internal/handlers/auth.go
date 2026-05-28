@@ -19,7 +19,7 @@ var (
 // GET /api/v1/auth/nonce
 func (h *Handler) GetNonce(c *gin.Context) {
 	nonce := services.GenerateNonce()
-	
+
 	noncesMu.Lock()
 	nonces[nonce] = time.Now().Add(5 * time.Minute) // valid for 5 min
 	noncesMu.Unlock()

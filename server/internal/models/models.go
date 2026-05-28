@@ -90,11 +90,11 @@ type User struct {
 // ── Request DTOs ──────────────────────────────────────────────────────────────
 
 type RegisterProductRequest struct {
-    Name         string    `json:"name"         binding:"required"`
-    Manufacturer string    `json:"manufacturer" binding:"required"`
-    Material     WasteType `json:"material"`
-    WeightGrams  int       `json:"weightGrams"  binding:"required"`
-    WalletAddr   string    `json:"walletAddr"`   // ← NO binding tag
+	Name         string    `json:"name"         binding:"required"`
+	Manufacturer string    `json:"manufacturer" binding:"required"`
+	Material     WasteType `json:"material"`
+	WeightGrams  int       `json:"weightGrams"  binding:"required"`
+	WalletAddr   string    `json:"walletAddr"` // ← NO binding tag
 }
 
 type WasteDepositRequest struct {
@@ -134,10 +134,10 @@ func CalculateTokens(wasteType WasteType, weightGrams int) int {
 // ── In-memory store ───────────────────────────────────────────────────────────
 
 type Store struct {
-	mu         sync.RWMutex
-	deposits   map[uint64]*WasteDeposit
-	products   map[string]*Product
-	nextID     uint64
+	mu       sync.RWMutex
+	deposits map[uint64]*WasteDeposit
+	products map[string]*Product
+	nextID   uint64
 }
 
 func NewStore() *Store {

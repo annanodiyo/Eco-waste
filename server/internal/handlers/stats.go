@@ -58,7 +58,7 @@ func (h *StatsHandler) GetStats(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"totalDeposits":            totalDeposits,
 		"totalRecycledCount":       totalRecycledCount,
-		"totalWeightGrams":        totalWeightGrams,
+		"totalWeightGrams":         totalWeightGrams,
 		"totalRecycledWeightGrams": totalRecycledWeightGrams,
 		"totalTokensIssued":        totalTokensIssued,
 		"activeCollectors":         len(collectorsMap),

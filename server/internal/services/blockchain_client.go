@@ -18,16 +18,17 @@ import (
 
 // EthClient wraps a live go-ethereum RPC connection to Polygon/Ethereum.
 type EthClient struct {
-	client   *ethclient.Client
-	chainID  *big.Int
-	privKey  *ecdsa.PrivateKey
-	from     common.Address
+	client  *ethclient.Client
+	chainID *big.Int
+	privKey *ecdsa.PrivateKey
+	from    common.Address
 }
 
 // NewEthClient dials the configured RPC endpoint and loads the signing key.
 // Required env vars:
-//   ETH_RPC_URL     – e.g. "https://polygon-rpc.com" or Alchemy/Infura URL
-//   ETH_PRIVATE_KEY – hex-encoded private key for the relayer/backend wallet
+//
+//	ETH_RPC_URL     – e.g. "https://polygon-rpc.com" or Alchemy/Infura URL
+//	ETH_PRIVATE_KEY – hex-encoded private key for the relayer/backend wallet
 //
 // If either is missing the function logs a warning and returns nil, allowing
 // the app to fall back to the mock BlockchainService.

@@ -57,11 +57,11 @@ const eventIndexerDepositABI = `[
 
 // EventIndexer listens to on-chain events and reconciles the local DB.
 type EventIndexer struct {
-	eth         *EthClient
-	productRepo *repository.ProductRepository
-	depositRepo *repository.WasteDepositRepository
+	eth          *EthClient
+	productRepo  *repository.ProductRepository
+	depositRepo  *repository.WasteDepositRepository
 	pollInterval time.Duration
-	lastBlock   uint64
+	lastBlock    uint64
 }
 
 // NewEventIndexer creates the daemon; returns nil if no EthClient is available.
