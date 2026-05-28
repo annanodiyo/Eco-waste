@@ -59,6 +59,7 @@ func (a *App) routes() {
 	{
 		// Products
 		auth.POST("/products/register", middleware.RequireRole("MANUFACTURER", "ADMIN"), a.productHandler.RegisterProduct)
+		auth.POST("/products/transfer", middleware.RequireRole("MANUFACTURER", "SELLER", "VENDOR", "ADMIN"), a.productHandler.TransferOwnership)
 		auth.GET("/products", a.productHandler.ListProducts)
 		auth.GET("/products/:id", a.productHandler.GetProduct)
 		auth.POST("/products/decode-qr", a.productHandler.DecodeQR)

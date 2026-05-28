@@ -31,6 +31,10 @@ func (r *ProductRepository) Get(id string) (*models.Product, error) {
 	return &p, nil
 }
 
+func (r *ProductRepository) Update(p *models.Product) error {
+	return r.db.Save(p).Error
+}
+
 func (r *ProductRepository) GetAll() ([]*models.Product, error) {
 	var list []*models.Product
 	err := r.db.Order("registered_at desc").Find(&list).Error

@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/annanodiyo/Eco-waste/server/internal/models"
@@ -119,4 +120,58 @@ func (h *ProductHandler) DecodeQR(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"payload": payload, "found": false})
 	}
+}
+
+// POST /api/v1/products/transfer
+func (h *ProductHandler) TransferOwnership(c *gin.Context) {
+	var req struct {
+		ProductID string `json:"productId" binding:"required"`
+		NewOwner  string `json:"newOwner" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get current wallet from auth context
+	currentWalletVal, exists := c.Get("wallet")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthenticated"})
+		return
+	}
+	currentWallet := currentWalletVal.(string)
+
+	product, err := h.repo.Get(req.ProductID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error: " + err.Error()})
+		return
+	}
+	if product == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
+		return
+	}
+
+	// Verify that current user is the current owner
+	if strings.ToLower(product.WalletAddr) != strings.ToLower(currentWallet) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only the current product owner can transfer ownership"})
+		return
+	}
+
+	// Call blockchain mock/real transfer function
+	txHash, err := h.blockchain.TransferOwnershipOnChain(req.ProductID, req.NewOwner)
+	if err != nil {
+		fmt.Printf("blockchain transfer error (non-fatal): %v\n", err)
+		txHash = "pending-transfer"
+	}
+
+	// Update ownership in DB
+	product.WalletAddr = strings.ToLower(req.NewOwner)
+	product.TxHash = txHash
+
+	if err := h.repo.Update(product); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update ownership: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ownership transferred successfully", "product": product})
 }
