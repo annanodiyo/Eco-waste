@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Check, Loader2, AlertCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -12,11 +12,14 @@ import {
 } from "@/lib/api/ecoApi";
 
 export const Route = createFileRoute("/recycler")({
-  head: () => ({ meta: [{ title: "Recycler / NGO · EcoToken" }] }),
-  component: Recycler,
+  component: LegacyRecyclerRoute,
 });
 
-function Recycler() {
+function LegacyRecyclerRoute() {
+  return <Navigate to="/dashboard" />;
+}
+
+export function RecyclerDashboard() {
   const { address, connect } = useWallet();
   const [deposits, setDeposits] = useState<WasteDeposit[]>([]);
   const [loading, setLoading] = useState(true);

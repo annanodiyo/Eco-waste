@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Wallet, Loader2, CheckCircle2, X } from "lucide-react";
 import { useWallet, shortAddr } from "@/lib/wallet";
-import { useRoleSession } from "@/lib/roleSession";
+import { useRoleSession, type RoleKey } from "@/lib/roleSession";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  destination: "/consumer" | "/collector" | null;
+  role: RoleKey | null;
   roleLabel: string;
 };
 
 // Frontend-only gate: any non-empty value (including demo placeholders) is accepted.
 
-export function WalletConnectModal({ open, onClose, destination, roleLabel }: Props) {
+export function WalletConnectModal({ open, onClose, role, roleLabel }: Props) {
   const navigate = useNavigate();
   const { address, connect } = useWallet();
   const { setActiveRole } = useRoleSession();
@@ -38,7 +38,7 @@ export function WalletConnectModal({ open, onClose, destination, roleLabel }: Pr
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open || !destination) return null;
+  if (!open || !role) return null;
 
   const manualValid = manual.trim().length > 0;
   const canContinue = !!address || manualValid;
@@ -57,8 +57,8 @@ export function WalletConnectModal({ open, onClose, destination, roleLabel }: Pr
       setTouched(true);
       return;
     }
-    setActiveRole(destination === "/consumer" ? "consumer" : "collector");
-    navigate({ to: destination });
+    setActiveRole(role);
+    navigate({ to: "/dashboard" });
     onClose();
   };
 
@@ -67,7 +67,7 @@ export function WalletConnectModal({ open, onClose, destination, roleLabel }: Pr
       role="dialog"
       aria-modal="true"
       aria-labelledby="wallet-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
@@ -102,7 +102,6 @@ export function WalletConnectModal({ open, onClose, destination, roleLabel }: Pr
           transactions.
         </p>
 
-        {/* Option A: Connect */}
         <div className="rounded-[12px] ring-1 ring-black/5 p-4 mb-3 bg-background">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -134,7 +133,6 @@ export function WalletConnectModal({ open, onClose, destination, roleLabel }: Pr
           <div className="h-px bg-zinc-200 flex-1" />
         </div>
 
-        {/* Option B: Manual */}
         <label className="block">
           <span className="text-xs font-mono uppercase tracking-widest text-ui-muted">
             Enter Wallet ID
@@ -157,6 +155,9 @@ export function WalletConnectModal({ open, onClose, destination, roleLabel }: Pr
           <span className="block mt-2 text-[11px] text-ui-muted">
             Demo mode: any value works (e.g. <span className="font-mono">0xECO-DEMO-1234</span>).
           </span>
+          {touched && !canContinue && (
+            <span className="block mt-1 text-[11px] text-red-600">Enter a wallet id or connect a wallet.</span>
+          )}
         </label>
 
         <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">

@@ -11,10 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RecyclerRouteImport } from './routes/recycler'
 import { Route as ManufacturerRouteImport } from './routes/manufacturer'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as CollectorRouteImport } from './routes/collector'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JourneyItemIdRouteImport } from './routes/journey.$itemId'
+import { Route as DashboardQueueRouteImport } from './routes/dashboard.queue'
+import { Route as DashboardPickupsRouteImport } from './routes/dashboard.pickups'
+import { Route as DashboardInventoryRouteImport } from './routes/dashboard.inventory'
 
 const RecyclerRoute = RecyclerRouteImport.update({
   id: '/recycler',
@@ -24,6 +28,11 @@ const RecyclerRoute = RecyclerRouteImport.update({
 const ManufacturerRoute = ManufacturerRouteImport.update({
   id: '/manufacturer',
   path: '/manufacturer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsumerRoute = ConsumerRouteImport.update({
@@ -46,21 +55,44 @@ const JourneyItemIdRoute = JourneyItemIdRouteImport.update({
   path: '/journey/$itemId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardQueueRoute = DashboardQueueRouteImport.update({
+  id: '/queue',
+  path: '/queue',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPickupsRoute = DashboardPickupsRouteImport.update({
+  id: '/pickups',
+  path: '/pickups',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardInventoryRoute = DashboardInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/collector': typeof CollectorRoute
   '/consumer': typeof ConsumerRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/manufacturer': typeof ManufacturerRoute
   '/recycler': typeof RecyclerRoute
+  '/dashboard/inventory': typeof DashboardInventoryRoute
+  '/dashboard/pickups': typeof DashboardPickupsRoute
+  '/dashboard/queue': typeof DashboardQueueRoute
   '/journey/$itemId': typeof JourneyItemIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/collector': typeof CollectorRoute
   '/consumer': typeof ConsumerRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/manufacturer': typeof ManufacturerRoute
   '/recycler': typeof RecyclerRoute
+  '/dashboard/inventory': typeof DashboardInventoryRoute
+  '/dashboard/pickups': typeof DashboardPickupsRoute
+  '/dashboard/queue': typeof DashboardQueueRoute
   '/journey/$itemId': typeof JourneyItemIdRoute
 }
 export interface FileRoutesById {
@@ -68,8 +100,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/collector': typeof CollectorRoute
   '/consumer': typeof ConsumerRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/manufacturer': typeof ManufacturerRoute
   '/recycler': typeof RecyclerRoute
+  '/dashboard/inventory': typeof DashboardInventoryRoute
+  '/dashboard/pickups': typeof DashboardPickupsRoute
+  '/dashboard/queue': typeof DashboardQueueRoute
   '/journey/$itemId': typeof JourneyItemIdRoute
 }
 export interface FileRouteTypes {
@@ -78,24 +114,36 @@ export interface FileRouteTypes {
     | '/'
     | '/collector'
     | '/consumer'
+    | '/dashboard'
     | '/manufacturer'
     | '/recycler'
+    | '/dashboard/inventory'
+    | '/dashboard/pickups'
+    | '/dashboard/queue'
     | '/journey/$itemId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/collector'
     | '/consumer'
+    | '/dashboard'
     | '/manufacturer'
     | '/recycler'
+    | '/dashboard/inventory'
+    | '/dashboard/pickups'
+    | '/dashboard/queue'
     | '/journey/$itemId'
   id:
     | '__root__'
     | '/'
     | '/collector'
     | '/consumer'
+    | '/dashboard'
     | '/manufacturer'
     | '/recycler'
+    | '/dashboard/inventory'
+    | '/dashboard/pickups'
+    | '/dashboard/queue'
     | '/journey/$itemId'
   fileRoutesById: FileRoutesById
 }
@@ -103,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CollectorRoute: typeof CollectorRoute
   ConsumerRoute: typeof ConsumerRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   ManufacturerRoute: typeof ManufacturerRoute
   RecyclerRoute: typeof RecyclerRoute
   JourneyItemIdRoute: typeof JourneyItemIdRoute
@@ -122,6 +171,13 @@ declare module '@tanstack/react-router' {
       path: '/manufacturer'
       fullPath: '/manufacturer'
       preLoaderRoute: typeof ManufacturerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/consumer': {
@@ -152,13 +208,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JourneyItemIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/queue': {
+      id: '/dashboard/queue'
+      path: '/queue'
+      fullPath: '/dashboard/queue'
+      preLoaderRoute: typeof DashboardQueueRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/pickups': {
+      id: '/dashboard/pickups'
+      path: '/pickups'
+      fullPath: '/dashboard/pickups'
+      preLoaderRoute: typeof DashboardPickupsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/inventory': {
+      id: '/dashboard/inventory'
+      path: '/inventory'
+      fullPath: '/dashboard/inventory'
+      preLoaderRoute: typeof DashboardInventoryRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
+
+interface DashboardRouteChildren {
+  DashboardInventoryRoute: typeof DashboardInventoryRoute
+  DashboardPickupsRoute: typeof DashboardPickupsRoute
+  DashboardQueueRoute: typeof DashboardQueueRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardInventoryRoute: DashboardInventoryRoute,
+  DashboardPickupsRoute: DashboardPickupsRoute,
+  DashboardQueueRoute: DashboardQueueRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CollectorRoute: CollectorRoute,
   ConsumerRoute: ConsumerRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   ManufacturerRoute: ManufacturerRoute,
   RecyclerRoute: RecyclerRoute,
   JourneyItemIdRoute: JourneyItemIdRoute,

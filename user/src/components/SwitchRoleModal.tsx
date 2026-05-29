@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { LogOut, X } from "lucide-react";
 import { useRoleSession } from "@/lib/roleSession";
+import { openRolePicker } from "@/lib/rolePicker";
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -23,7 +24,8 @@ export function SwitchRoleModal({ open, onClose }: Props) {
   const confirm = () => {
     clearRole();
     onClose();
-    navigate({ to: "/", hash: "choose-role" });
+    navigate({ to: "/" });
+    openRolePicker();
   };
 
   return (

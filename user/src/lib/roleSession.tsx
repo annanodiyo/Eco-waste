@@ -3,23 +3,32 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 export type RoleKey = "consumer" | "collector" | "recycler" | "manufacturer";
 
 export const ROLE_PATHS: Record<RoleKey, string> = {
+  consumer: "/dashboard",
+  collector: "/dashboard",
+  recycler: "/dashboard",
+  manufacturer: "/dashboard",
+};
+
+const LEGACY_ROLE_PATHS: Record<RoleKey, string> = {
   consumer: "/consumer",
   collector: "/collector",
   recycler: "/recycler",
   manufacturer: "/manufacturer",
 };
 
-const ALL_ROLE_PATHS = Object.values(ROLE_PATHS);
-
 export function pathToRole(path: string): RoleKey | null {
-  for (const [key, p] of Object.entries(ROLE_PATHS)) {
+  for (const [key, p] of Object.entries(LEGACY_ROLE_PATHS)) {
     if (path === p || path.startsWith(p + "/")) return key as RoleKey;
   }
   return null;
 }
 
 export function isRolePath(path: string): boolean {
-  return ALL_ROLE_PATHS.some((p) => path === p || path.startsWith(p + "/"));
+  return (
+    path === "/dashboard" ||
+    path.startsWith("/dashboard/") ||
+    Object.values(LEGACY_ROLE_PATHS).some((p) => path === p || path.startsWith(p + "/"))
+  );
 }
 
 type RoleSessionState = {
