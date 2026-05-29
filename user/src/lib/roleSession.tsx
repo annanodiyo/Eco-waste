@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 export type RoleKey = "consumer" | "collector" | "recycler" | "manufacturer";
 
@@ -31,32 +31,40 @@ type RoleSessionState = {
 const Ctx = createContext<RoleSessionState | null>(null);
 const STORAGE_KEY = "ecotoken:active-role";
 
-export function RoleSessionProvider({ children }: { children: ReactNode }) {
+export function RoleSessionProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [activeRole, setRole] = useState<RoleKey | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem(STORAGE_KEY) as RoleKey | null;
-    if (saved && saved in ROLE_PATHS) setRole(saved);
-  }, []);
 
   const setActiveRole = (role: RoleKey) => {
     setRole(role);
-    if (typeof window !== "undefined") window.localStorage.setItem(STORAGE_KEY, role);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, role);
+    }
   };
 
   const clearRole = () => {
     setRole(null);
-    if (typeof window !== "undefined") window.localStorage.removeItem(STORAGE_KEY);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
   };
 
   return (
-    <Ctx.Provider value={{ activeRole, setActiveRole, clearRole }}>{children}</Ctx.Provider>
+    <Ctx.Provider value={{ activeRole, setActiveRole, clearRole }}>
+      {children}
+    </Ctx.Provider>
   );
 }
 
 export function useRoleSession() {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useRoleSession must be used inside RoleSessionProvider");
+  if (!ctx) {
+    throw new Error(
+      "useRoleSession must be used inside RoleSessionProvider"
+    );
+  }
   return ctx;
 }
