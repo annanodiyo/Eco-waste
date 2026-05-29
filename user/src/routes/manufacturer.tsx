@@ -6,13 +6,12 @@ import { ChainBadge } from "@/components/ChainBadge";
 
 import { useWallet, shortAddr } from "@/lib/wallet";
 import { TxHash } from "@/components/TxHash";
+import { listProducts, registerProduct, type WasteType } from "@/lib/api/ecoApi";
 
 export const Route = createFileRoute("/manufacturer")({
   head: () => ({ meta: [{ title: "Manufacturer · EcoToken" }] }),
   component: Manufacturer,
 });
-
-const API = "http://localhost:8080/api/v1";
 
 const MATERIAL_OPTIONS: { label: string; value: number }[] = [
   { label: "PET Plastic",       value: 0 },
@@ -73,9 +72,7 @@ function Manufacturer() {
   const fetchBatches = useCallback(async () => {
     setBatchesLoading(true);
     try {
-      const res = await fetch(`${API}/products`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await listProducts();
       setBatches(data.products ?? []);
     } catch (e) {
       console.error("Failed to fetch products:", e);
@@ -91,22 +88,13 @@ function Manufacturer() {
     setErrorMsg("");
     setRegisteredProduct(null);
     try {
-      const res = await fetch(`${API}/products/register`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name:         form.name,
-          manufacturer: form.manufacturer,
-          material:     form.material,
-          weightGrams:  form.weightGrams,
-          walletAddr:   form.walletAddr || undefined,
-        }),
+      const product = await registerProduct({
+        name:         form.name,
+        manufacturer: form.manufacturer,
+        material:     form.material as WasteType,
+        weightGrams:  form.weightGrams,
+        walletAddr:   form.walletAddr || undefined,
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? `HTTP ${res.status}`);
-      }
-      const product: Product = await res.json();
       setRegisteredProduct(product);
       setStatus("success");
       fetchBatches();

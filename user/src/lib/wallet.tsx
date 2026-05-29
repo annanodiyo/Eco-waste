@@ -91,9 +91,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connect = async () => {
     if (!window.ethereum) {
-      // Graceful fallback to a local mock address so user does not get redirected to metamask website
-      console.warn("MetaMask not detected. Falling back to a local mock wallet address.");
-      const mockAddr = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+      console.warn("MetaMask not detected. Requesting mock wallet address.");
+      const defaultMock = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+      const input = window.prompt(
+        "MetaMask is not detected. Enter a custom mock wallet address to use:",
+        defaultMock
+      );
+      if (input === null) return; // user cancelled
+      const mockAddr = input.trim() || defaultMock;
       setAddress(mockAddr);
       return;
     }
