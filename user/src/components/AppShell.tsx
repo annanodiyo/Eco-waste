@@ -87,7 +87,7 @@ const ROLES: Record<RoleKey, RoleDef> = {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { address, connect, disconnect } = useWallet();
-  const { activeRole } = useRoleSession();
+  const { activeRole, clearRole } = useRoleSession();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [switchOpen, setSwitchOpen] = useState(false);
@@ -95,6 +95,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // Route guard: enforce role-based access on role paths.
   useEffect(() => {
+    if (path === "/" && activeRole) {
+      // If user has a role, don't let them see landing again, lock them into their dashboard
+      navigate({ to: ROLES[activeRole].path });
+      return;
+    }
+
     if (!isRolePath(path)) {
       setDenied(false);
       return;
@@ -139,9 +145,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="px-4 max-w-screen-xl mx-auto h-14 flex items-center justify-between gap-4">
           {/* Brand */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className="size-6 bg-brand-primary rounded-sm flex items-center justify-center">
-              <div className="size-2 bg-neutral-50 rounded-full" />
-            </div>
             <span className="font-mono text-sm font-semibold tracking-tighter uppercase">
               EcoToken
             </span>
@@ -177,15 +180,18 @@ export function AppShell({ children }: { children: ReactNode }) {
             )}
           </div>
 
-          {/* Right utility */}
+          {/* Exit/Change Role */}
           <div className="flex items-center gap-2 shrink-0">
             {role && (
               <button
-                onClick={() => setSwitchOpen(true)}
-                className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-ui-muted hover:text-brand-primary px-2 py-1 rounded-full"
+                onClick={() => {
+                  clearRole();
+                  navigate({ to: "/" });
+                }}
+                className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-ui-muted hover:text-red-500 px-3 py-1 rounded-full transition-colors"
               >
                 <LogOut className="size-3" />
-                Switch role
+                Exit Workspace
               </button>
             )}
             {address ? (
@@ -244,9 +250,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           {role && ActiveIcon && (
             <Link
               to={role.path}
-              className="flex flex-col items-center gap-0.5 py-1.5 px-3 text-brand-primary"
+              className={`flex flex-col items-center gap-0.5 py-1.5 px-3 ${path === role.path ? "text-brand-primary" : "text-zinc-400"}`}
             >
-              <ActiveIcon className="size-5" strokeWidth={2.2} />
+              <ActiveIcon className="size-5" strokeWidth={path === role.path ? 2.2 : 1.6} />
               <span className="text-[10px] font-medium uppercase tracking-tighter">
                 {role.label}
               </span>
@@ -254,11 +260,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
           {role && (
             <button
-              onClick={() => setSwitchOpen(true)}
-              className="flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-400"
+              onClick={() => {
+                clearRole();
+                navigate({ to: "/" });
+              }}
+              className="flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-400 hover:text-red-500 transition-colors"
             >
               <LogOut className="size-5" strokeWidth={1.6} />
-              <span className="text-[10px] font-medium uppercase tracking-tighter">Switch</span>
+              <span className="text-[10px] font-medium uppercase tracking-tighter">Exit</span>
             </button>
           )}
         </div>
