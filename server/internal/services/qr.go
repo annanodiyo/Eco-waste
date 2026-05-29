@@ -17,8 +17,11 @@ type QRPayload struct {
 	WeightGrams  int    `json:"weightGrams"`
 }
 
-// GenerateQR creates a base64-encoded PNG of the QR code for the given product.
+// GenerateQR creates a base64-encoded PNG data URI of the QR code for the given product.
 func GenerateQR(payload QRPayload) (string, error) {
+	if payload.ProductID == "" {
+		return "", fmt.Errorf("generate qr: productID is required")
+	}
 	data, err := json.Marshal(payload)
 	if err != nil {
 		return "", fmt.Errorf("marshal qr payload: %w", err)
