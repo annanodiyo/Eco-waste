@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -152,6 +153,8 @@ type storeData struct {
 	NextID   uint64          `json:"nextId"`
 }
 
+// SaveToFile persists the current store state to disk.
+// IMPORTANT: Caller must hold s.mu (write lock) before calling this method.
 func (s *Store) SaveToFile() {
 	if s.dbPath == "" {
 		return
@@ -166,8 +169,14 @@ func (s *Store) SaveToFile() {
 		data.Products = append(data.Products, p)
 	}
 
-	b, _ := json.MarshalIndent(data, "", "  ")
-	_ = os.WriteFile(s.dbPath, b, 0644)
+	b, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		fmt.Printf("store: failed to marshal data: %v\n", err)
+		return
+	}
+	if err := os.WriteFile(s.dbPath, b, 0644); err != nil {
+		fmt.Printf("store: failed to write %s: %v\n", s.dbPath, err)
+	}
 }
 
 func (s *Store) LoadFromFile() {
@@ -176,10 +185,14 @@ func (s *Store) LoadFromFile() {
 	}
 	b, err := os.ReadFile(s.dbPath)
 	if err != nil {
+		if !os.IsNotExist(err) {
+			fmt.Printf("store: failed to read %s: %v\n", s.dbPath, err)
+		}
 		return
 	}
 	var data storeData
 	if err := json.Unmarshal(b, &data); err != nil {
+		fmt.Printf("store: failed to parse %s: %v\n", s.dbPath, err)
 		return
 	}
 	s.nextID = data.NextID
