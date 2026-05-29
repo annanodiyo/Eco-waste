@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,7 @@ import (
 // Converts a depositor's total earned tokens to KSH (1 token = KSH 0.50)
 
 func (h *WasteHandler) ConsumerTokensToKSH(c *gin.Context) {
-	addr := c.Param("address")
+	addr := strings.ToLower(c.Param("address"))
 
 	deposits := h.store.GetDepositsByDepositor(addr)
 	if len(deposits) == 0 {
