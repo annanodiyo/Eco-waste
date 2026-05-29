@@ -5,7 +5,7 @@ import (
 )
 
 
-func (h *Handler) WalletBallance(c *gin.Context) {}
+func (h *Handler) WalletBalance(c *gin.Context) {}
 
 
 func (h *Handler) ConsumerHistory(c *gin.Context) {}
