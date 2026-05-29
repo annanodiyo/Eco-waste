@@ -5,21 +5,12 @@ import { AppShell } from "@/components/AppShell";
 import { QrScanModal } from "@/components/QrScanModal";
 import { TxHash } from "@/components/TxHash";
 import { useWallet, shortAddr } from "@/lib/wallet";
-import { getDepositorHistory, type WasteDeposit } from "@/lib/api/ecoApi";
+import { getDepositorHistory, getKshAmount, type WasteDeposit } from "@/lib/api/ecoApi";
 
 export const Route = createFileRoute("/consumer")({
   head: () => ({ meta: [{ title: "Consumer Wallet · EcoToken" }] }),
   component: Consumer,
 });
-
-const API = "http://localhost:8080/api/v1";
-
-async function getKshAmount(address: string): Promise<number> {
-  const res = await fetch(`${API}/amount/${address}/kshs`);
-  if (!res.ok) return 0;
-  const data = await res.json();
-  return data.kshValue ?? 0;
-}
 
 function Consumer() {
   const { address, balance, connect, loading: walletLoading, refreshBalance } = useWallet();
