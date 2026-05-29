@@ -48,7 +48,7 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 	txHash, err := h.blockchain.DepositWasteOnChain(
 		req.ProductID, req.HasQR,
 		[20]byte{}, // real version: common.HexToAddress(req.DepositorAddr)
-		uint8(wasteType), nil,
+		uint8(wasteType), req.WeightGrams,
 	)
 	if err != nil {
 		fmt.Printf("blockchain deposit error (non-fatal): %v\n", err)
@@ -93,7 +93,7 @@ func (h *WasteHandler) ConfirmRecycling(c *gin.Context) {
 		return
 	}
 
-	txHash, err := h.blockchain.ConfirmRecyclingOnChain(nil)
+	txHash, err := h.blockchain.ConfirmRecyclingOnChain(deposit.ID)
 	if err != nil {
 		fmt.Printf("blockchain confirm error (non-fatal): %v\n", err)
 		txHash = "pending"

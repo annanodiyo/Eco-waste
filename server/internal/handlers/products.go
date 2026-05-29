@@ -46,7 +46,7 @@ func (h *ProductHandler) RegisterProduct(c *gin.Context) {
 
 	txHash, err := h.blockchain.RegisterProductOnChain(
 		productID, req.Name, uint8(req.Material),
-		nil,
+		req.WeightGrams,
 		req.Manufacturer,
 	)
 	if err != nil {

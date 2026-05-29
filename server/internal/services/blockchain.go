@@ -8,7 +8,7 @@ type BlockchainService struct{}
 func (b *BlockchainService) RegisterProductOnChain(
 	productID, name string,
 	material uint8,
-	weight interface{},
+	weightGrams int,
 	manufacturer string,
 ) (string, error) {
 	return fmt.Sprintf("mock-tx-register-%s", productID), nil
@@ -19,11 +19,11 @@ func (b *BlockchainService) DepositWasteOnChain(
 	hasQR bool,
 	depositorAddr [20]byte,
 	wasteType uint8,
-	weight interface{},
+	weightGrams int,
 ) (string, error) {
 	return fmt.Sprintf("mock-tx-deposit-%s", productID), nil
 }
 
-func (b *BlockchainService) ConfirmRecyclingOnChain(depositID interface{}) (string, error) {
-	return "mock-tx-confirm", nil
+func (b *BlockchainService) ConfirmRecyclingOnChain(depositID uint64) (string, error) {
+	return fmt.Sprintf("mock-tx-confirm-%d", depositID), nil
 }
