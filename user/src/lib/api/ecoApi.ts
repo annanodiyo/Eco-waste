@@ -136,3 +136,8 @@ export async function getAllDeposits(): Promise<{ deposits: WasteDeposit[]; tota
 export async function getDeposit(id: number): Promise<WasteDeposit> {
     return request(`/waste/${id}`);
 }
+
+export async function getKshAmount(address: string): Promise<number> {
+    const data = await request<{ kshValue: number }>(`/amount/${encodeURIComponent(address)}/kshs`);
+    return data.kshValue ?? 0;
+}
