@@ -20,6 +20,7 @@ type WalletState = {
   connect: () => Promise<void>;
   disconnect: () => void;
   refreshBalance: () => Promise<void>;
+  addReward: (amount: number) => void;
 };
 
 const WalletCtx = createContext<WalletState | null>(null);
@@ -84,9 +85,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [address]);
 
+  const addReward = useCallback((amount: number) => {
+    setBalance((prev) => prev + amount);
+  }, []);
+
   const connect = async () => {
     if (!window.ethereum) {
-      window.open("https://metamask.io/download/", "_blank");
+      // Graceful fallback to a local mock address so user does not get redirected to metamask website
+      console.warn("MetaMask not detected. Falling back to a local mock wallet address.");
+      const mockAddr = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+      setAddress(mockAddr);
       return;
     }
     setLoading(true);
@@ -113,7 +121,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <WalletCtx.Provider value={{ address, balance, loading, connect, disconnect, refreshBalance }}>
+    <WalletCtx.Provider value={{ address, balance, loading, connect, disconnect, refreshBalance, addReward }}>
       {children}
     </WalletCtx.Provider>
   );
