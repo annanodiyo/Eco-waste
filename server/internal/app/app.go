@@ -1,6 +1,9 @@
 package app
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/annanodiyo/Eco-waste/server/internal/handlers"
 	"github.com/annanodiyo/Eco-waste/server/internal/middleware"
 	"github.com/annanodiyo/Eco-waste/server/internal/models"
@@ -55,7 +58,11 @@ func (a *App) routes() {
 func (a *App) run() {
 	a.middlewares()
 	a.routes()
-	_ = a.router.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	_ = a.router.Run(fmt.Sprintf(":%s", port))
 }
 
 func StartService() {
