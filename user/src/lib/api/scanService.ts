@@ -91,12 +91,24 @@ export async function resolveScan(
     };
   } catch (err) {
     if (!shouldFallbackToMock(err)) {
+      let reason = "Invalid or unknown QR code";
+      if (err instanceof Error) {
+        // Try to parse the error message if it looks like JSON from our Gin backend
+        try {
+          const parsed = JSON.parse(err.message);
+          if (parsed.error) reason = parsed.error;
+        } catch {
+          reason = err.message;
+        }
+      }
+
       return {
         status: "invalid-code",
-        reason: "Invalid or unknown QR code",
+        reason,
         rawText: parsed.rawText,
       };
     }
+
 
     const product = parsed.productId
       ? (PRODUCTS.find((p) => p.id === parsed.productId) ?? null)
