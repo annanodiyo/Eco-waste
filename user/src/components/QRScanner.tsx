@@ -15,6 +15,14 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
     const [error, setError] = useState<string | null>(null);
     const controlsRef = useRef<IScannerControls | null>(null);
 
+    const onScanRef = useRef(onScan);
+    const onCloseRef = useRef(onClose);
+
+    useEffect(() => {
+        onScanRef.current = onScan;
+        onCloseRef.current = onClose;
+    }, [onScan, onClose]);
+
     useEffect(() => {
         if (!isOpen) {
             if (controlsRef.current) {
@@ -43,8 +51,8 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                     videoRef.current!,
                     (result, err) => {
                         if (result) {
-                            onScan(result.getText());
-                            onClose();
+                            onScanRef.current(result.getText());
+                            onCloseRef.current();
                         }
                     }
                 );
@@ -65,7 +73,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                 controlsRef.current = null;
             }
         };
-    }, [isOpen, onClose, onScan]);
+    }, [isOpen]);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
