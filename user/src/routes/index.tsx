@@ -43,33 +43,45 @@ function Landing() {
     <AppShell>
       <main>
         {/* Hero */}
-        <section className="px-4 max-w-screen-xl mx-auto pt-10 md:pt-16 pb-8">
-          <span className="text-xs font-mono font-medium text-brand-primary uppercase tracking-widest mb-3 block">
-            <span className="inline-block size-1.5 bg-brand-accent rounded-full mr-2 animate-pulse" />
-            System Status: Live · Block 843,001
-          </span>
-          <h1 className="text-4xl sm:text-6xl font-semibold leading-[1.05] tracking-tight text-balance max-w-[18ch]">
-            Material provenance recorded on-chain.
-          </h1>
-          <p className="mt-6 text-ui-muted max-w-[52ch] text-pretty">
-            EcoToken tracks every waste handoff — manufacturer to recycler — as a signed
-            ledger event. Scan, drop off, and earn $ECO. No greenwashing. No double-counting.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a
-              href="#choose-role"
-              className="inline-flex items-center gap-2 bg-ui-dark text-neutral-50 px-5 py-3 rounded-full text-sm font-medium hover:bg-brand-primary transition-colors"
-            >
-              Choose your role
-              <ArrowUpRight className="size-4" />
-            </a>
-            <Link
-              to="/journey/$itemId"
-              params={{ itemId: PRODUCTS[0].id }}
-              className="inline-flex items-center gap-2 bg-background text-ui-dark px-5 py-3 rounded-full text-sm font-medium ring-1 ring-black/10 hover:bg-zinc-100"
-            >
-              View a live waste journey
-            </Link>
+        <section className="px-4 max-w-screen-xl mx-auto pt-10 md:pt-24 pb-16">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="text-xs font-mono font-medium text-brand-primary uppercase tracking-widest mb-4 block">
+                <span className="inline-block size-2 bg-brand-accent rounded-full mr-2 animate-pulse" />
+                System Status: Live · Block 843,001
+              </span>
+              <h1 className="text-5xl sm:text-7xl font-bold leading-[1.05] tracking-tight text-balance">
+                Material provenance recorded on-chain.
+              </h1>
+              <p className="mt-8 text-lg text-ui-muted max-w-[48ch] text-pretty leading-relaxed">
+                EcoToken tracks every waste handoff — manufacturer to recycler — as a signed
+                ledger event. Scan, drop off, and earn $ECO. No greenwashing. No double-counting.
+              </p>
+              <div className="mt-10 flex flex-wrap gap-4">
+                <a
+                  href="#choose-role"
+                  className="inline-flex items-center gap-2 bg-zinc-900 text-white px-8 py-4 rounded-2xl text-base font-semibold hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-[0.98]"
+                >
+                  Choose your role
+                  <ArrowUpRight className="size-5" />
+                </a>
+                <Link
+                  to="/journey/$itemId"
+                  params={{ itemId: PRODUCTS[0].id }}
+                  className="inline-flex items-center gap-2 bg-white text-zinc-900 px-8 py-4 rounded-2xl text-base font-semibold ring-1 ring-black/5 hover:bg-zinc-50 transition-all active:scale-[0.98]"
+                >
+                  Live Waste Journey
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative">
+              <img
+                src="/Gemini_Generated_Image_wr6t2cwr6t2cwr6t(1).png"
+                alt="Circular Economy Visualization"
+                className="w-full aspect-square object-cover rounded-[32px] animate-in fade-in zoom-in duration-1000"
+              />
+            </div>
           </div>
         </section>
 
