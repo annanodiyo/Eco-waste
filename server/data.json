@@ -1,36 +1,6 @@
 {
   "deposits": [
     {
-      "id": 6,
-      "productId": "",
-      "hasQr": false,
-      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
-      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
-      "wasteType": 0,
-      "wasteTypeName": "plastic",
-      "weightGrams": 500,
-      "tokensEarned": 50,
-      "status": 0,
-      "statusName": "pending",
-      "txHash": "mock-tx-deposit-",
-      "timestamp": "2026-05-29T03:47:27.35923228+03:00"
-    },
-    {
-      "id": 1,
-      "productId": "",
-      "hasQr": false,
-      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
-      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
-      "wasteType": 1,
-      "wasteTypeName": "glass",
-      "weightGrams": 500,
-      "tokensEarned": 25,
-      "status": 0,
-      "statusName": "pending",
-      "txHash": "mock-tx-deposit-",
-      "timestamp": "2026-05-29T03:42:49.481375042+03:00"
-    },
-    {
       "id": 2,
       "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
       "hasQr": true,
@@ -89,9 +59,78 @@
       "statusName": "pending",
       "txHash": "mock-tx-deposit-e9db7b70-0212-438b-976b-261a0abbf66f",
       "timestamp": "2026-05-29T03:46:48.140442984+03:00"
+    },
+    {
+      "id": 6,
+      "productId": "",
+      "hasQr": false,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 500,
+      "tokensEarned": 50,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-",
+      "timestamp": "2026-05-29T03:47:27.35923228+03:00"
+    },
+    {
+      "id": 7,
+      "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
+      "hasQr": true,
+      "depositorAddr": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "collectorAddr": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 24,
+      "tokensEarned": 2,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-e9db7b70-0212-438b-976b-261a0abbf66f",
+      "timestamp": "2026-05-29T05:48:12.87448104+03:00"
+    },
+    {
+      "id": 1,
+      "productId": "",
+      "hasQr": false,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 1,
+      "wasteTypeName": "glass",
+      "weightGrams": 500,
+      "tokensEarned": 25,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-",
+      "timestamp": "2026-05-29T03:42:49.481375042+03:00"
     }
   ],
   "products": [
+    {
+      "productId": "fb2ebd6e-47f8-4822-8e87-1cd8a45d0e06",
+      "name": "Eco Bottle",
+      "material": 0,
+      "materialName": "plastic",
+      "weightGrams": 350,
+      "manufacturer": "GreenCorp",
+      "walletAddr": "",
+      "registeredAt": "2026-05-29T05:59:38.457096489+03:00",
+      "txHash": "mock-tx-register-fb2ebd6e-47f8-4822-8e87-1cd8a45d0e06",
+      "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADbElEQVR42uyZMW77vBLEh1DBkjcQL2KI13JhgAJc6FoSdBHqBluyEDQPu4ryT7pXfFFYhFUQ/wqanJ0drvG3/tZ/vRLJtYSaWQL3KNwTQ+02kkczwAD49QjoWMK0buJ5QDw3sY9uAiKn9QgcE8PEjZ4knmkT7m0BcyTyHMmV1P+zPtzdwKp7W0ogSb+nEioaAwA/96jdQvGzI0dXwjS7b3r4YcBkv0l9DdEkd/3xvS5+GbDl9LpBzk5qXgi/lu8u8rPAAFIrMS/U25TaLYXjo0fNRztAFHRFqcKaNvG702+h2sNdACB+BvBKBc90BAVYO5X+0A4Q5QkEE5jfo/g9UaBuv98GqOz3PgCu2N44DjHURxS+j2YARI7ogx9TQT61V8x26wt3AalIJgVZJddttN1Oew+8hmYAVwBtQCMgT0ThmIpYXXC+C0AUP0f6cYh4dhS+F4YxUdgUwBFRakerTTtbDRPmvbcByLuTegYJrU9tjcn03wzgikC9y87tgaD3Djvbj9q8AUjaaFTteoB6m7sahRlZO4CzWEV0CznNfagvbUn8d903AIga8YRvkpP+X61VJVdfQzOAK8EO8M3CyULOcXXz+T6Akyb2UfWvYS8f0eKfaa8RQA1EuyHnaN/izPBrAd/zXUAqln8tNqjSNOyZ21/+0AKgz660ES9EeH3svBdtUn3wn6/mHwecnpvmT3eqXXd7dpwdzQDQWOVoidR/uL1AY899gKPkdbNXc5h2yw+k2tqVilsALH/2QauA046g+UqeqeCqzRsAbYJ7H/zbHoOwIj2HQlfvbgAYECp6+H1AGNNGM7HpS2y+AbARUEHtjhhqR+pJBq1WfxlIA4BertkFiecjaobX1qi2hvuAMK3F9ifZposqQrW1z0HN7wPp/NCP0Os+Al6uSF752RZvAFyxRKX5U/sj9FXIaY/85/YNABQ8evg3tYEX6LdA1qvOtwGJKi6VXLHWbI3SzLQhQFensWqI8LMj8kJBKqhXbP554Brsd2qi6yZ2m7Wz1NcMcE3+X+kcz9rm85c0eAdwDvZrN0ebdVTY+Iq8ZkHNABvPYdrDWeJC/jrxvgcwf2BRo9fbpPj5TBTNALAQWPNiUwVUGx+lTb7+nvXDwIfsbbyQdyd+dIVq+/Xrrw+/DPytv/X/r/8FAAD//1bp1VgQprd6AAAAAElFTkSuQmCC"
+    },
+    {
+      "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
+      "name": "Spring Water",
+      "material": 0,
+      "materialName": "plastic",
+      "weightGrams": 24,
+      "manufacturer": "Polymer Co.",
+      "walletAddr": "",
+      "registeredAt": "2026-05-29T03:43:46.594511642+03:00",
+      "txHash": "mock-tx-register-e9db7b70-0212-438b-976b-261a0abbf66f",
+      "qrCode": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADaklEQVR42uyZsY3rPBCEh1DAkB2YjRhiWw4EkIADtyVDjVAdbMhA4PxYWnp+zv7gWcfgGB103wE67+7sDI3f83v+9Qkkl+yYDF0CwPsM3IaVZO0GGAE7ewImu8dClskQlqu0X50EeD7mC8owe7Gbp00hM4VVuPUFLJSi7xyX6pjgcbuaHwCYRg9LCuIzu4TOAMAu1WEKlDgblqF6x9l89MOXgdb2q5Rp9O7x1w+fc/HDgJ6hglvIfMyGNo1guX6KyJeBEe5BCu9PHUkSQ/Us+upp7AYImSVUlPgkC7yQz4y4eSnDfBYwoskCppeIif6JxNlLif0AJr/KnUKGZXX2XuHKkFFiPQuAF7tk2GSyIzMQyaP/uwFG4BZWsfcZTAOFm8l8bF644TxAX9KpooqdDXlvLWfEcu4GMNTiujIwIy4ZOqQuBZWU8SwgZKefW4HJcgtV2867EihlQjcAvCCs5AZPciWm3fYUnAboRl5W1S7CbqY9V8VoTdgLEDJuQ3Wv/cjsEKvXJzhE7AyATT+10yRyFbuNIOfLu+V6APS/yE43IsugnRZeK8kmnAXoK7HCqmRFheIzS8N7AjyTriRW/zI5d6VCxh+lPQNo0QaTCumyKpBd0fhwKG0HgMkuDZq/RqhbpuVTjUTGmQDdaySZ1fXtZkaree8H2Mttt9G/1P6ujudqeKj9KYB7zEAZnmpN1UhUqDWl/avcPw20cle0TYSBrdwaXXHY5jMAIm5wWj6XAKcjKXaDO0SsD0BwvcDen80EapW9xntiOg2AJnf1D4YSt5dtaIphj0DaATB6V65eqNZd/ZU6UrEL30Hs+0DYZSFWyA2XNpti+RaxLgAyDSvtBg+7XZxN+kTLHetZgCaaZWVB0DAKHVLvCozYfS32ALR7PAp0HB7cM6BO62GbTwBMRlRr99qGFfoBqpF3f4a3B4CC5gbVLeO4LNLUcZT7+0CgRis0a9fugnRHl91R9AK0W7Xm/Tw5G+GmtllnM+EsoN0uVqdqQGr/N1e8rPLOOD8PtHy6Z8A4G8HUJuV9WXQGoBunNqPerhltCp/V7AWYDTHMno8NKJNOK9kG5FRAtMvkdjVUoWj1xVD7AbTccNBNbdvXEOq2mPHRct8F9u/UVCPkNlCzqO6g6kqs3QC/5/f8//NfAAAA//+vadAXy79aIAAAAABJRU5ErkJggg=="
+    },
     {
       "productId": "66fe9b1c-381b-4a1e-bde7-ad96deb10fc5",
       "name": "Test Bottle",
@@ -117,17 +156,17 @@
       "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADYElEQVR42uyZP46sPBDECxE49A3wRRC+FgESSBPMtRhxEXMDhwTI9akMM/s2+4K3fg7WEbv7C/ynu7q6F7/rd/3t5UmuHcwyOIwteUwDItqdZKoGGACzdpZ8Mc4M4DI4knvMfyoEOD63PWJmsMu9ScDvkWd1wNGuwNh31nAFj74pDiR7X6A22QSMqAwAzJbApaF9rg0BOH18i4cfBhT2uslpcPb5x8e3vPjXgNYdadQpBGD04ZuI/DCgR1xhzSM5SzICDXn4nTzrAbR6wDwS4gjYO9KaeEzFgCbEeUv2mF/EfLrI09NySzjaVA3gL+3C1IQ4olOS6jjukpQyQEM+T0ez5N2S5rHCPrnT3GFfAzBIVzvwzNoFa05cp/jE5M8DPmhL0egC0Tc8LhHr8BGxCoBGz61K7QPGHsj18YDj57l/HtCWNkbML3LxwV760CaYtz7UACACsJgTYo6yaYBV7TZLMWBweAd4RBusWZQITPYT9hUADbn0HTA1VF6Aj1V50eG4D1kCCNGsuknmvcFQz9o7YhrqAWgXn6zqd/7ZnD5wgSMXlAI8r3VKSHNphuMz/yrVBCwtI9rVRSOToyZDJke1qRQQpA/EdLs+pWSWtWOqB2iuU+THNWsTzTnALj7gmNdSwCCPt/Myw3rDpWGu0e+brAHwzNWIjxezmvHBAKkZH6kUMMA+N4l8EzAzWamZmkE19PUALo49rI7CQ5s/72ZQjqsQABfN6e5o9wFm8cyu5u2KawCaW1e5OiUIpbTRbHrytRQAZykzrE0+V0CtDY/+y5HWAORmXs3gevkHibw9Wn6euwCge5Mr1gXOZ5fnDDCS/nfyVgAMwCj/uejd+85SpI7zDrkCAFyczxxyYPZWk0rz6XjM9QBqVHt3DfSyf5hyDxvwiYcSAOazu7QL6grf07OvPqsCgBE9cMjDz3d9xNiq2SkGeAV5B/VZ1yxoAuwhQ3PWA+SpmrLgdoNXNWzlBlEK8JfQGzJYbjvN48U8Zvw6xb8H8px2p7xfnGWbW5mcbHtSMeAe7LcJuX0wZ5Of9c/xYx1AwjF5Jel1pRj9l3UvBezR8BXi2O5U7F3kgnoAtRWwfLwCrslechjlH5ahFJDbK7mF5Kx8TP43DbfwGXzUAPyu3/X/138BAAD//4LpGMk/U4ErAAAAAElFTkSuQmCC"
     },
     {
-      "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
-      "name": "Spring Water",
+      "productId": "d2a882d4-4db6-4970-82a7-fd24db02e0c4",
+      "name": "Spring Water 500ml",
       "material": 0,
       "materialName": "plastic",
       "weightGrams": 24,
       "manufacturer": "Polymer Co.",
       "walletAddr": "",
-      "registeredAt": "2026-05-29T03:43:46.594511642+03:00",
-      "txHash": "mock-tx-register-e9db7b70-0212-438b-976b-261a0abbf66f",
-      "qrCode": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADaklEQVR42uyZsY3rPBCEh1DAkB2YjRhiWw4EkIADtyVDjVAdbMhA4PxYWnp+zv7gWcfgGB103wE67+7sDI3f83v+9Qkkl+yYDF0CwPsM3IaVZO0GGAE7ewImu8dClskQlqu0X50EeD7mC8owe7Gbp00hM4VVuPUFLJSi7xyX6pjgcbuaHwCYRg9LCuIzu4TOAMAu1WEKlDgblqF6x9l89MOXgdb2q5Rp9O7x1w+fc/HDgJ6hglvIfMyGNo1guX6KyJeBEe5BCu9PHUkSQ/Us+upp7AYImSVUlPgkC7yQz4y4eSnDfBYwoskCppeIif6JxNlLif0AJr/KnUKGZXX2XuHKkFFiPQuAF7tk2GSyIzMQyaP/uwFG4BZWsfcZTAOFm8l8bF644TxAX9KpooqdDXlvLWfEcu4GMNTiujIwIy4ZOqQuBZWU8SwgZKefW4HJcgtV2867EihlQjcAvCCs5AZPciWm3fYUnAboRl5W1S7CbqY9V8VoTdgLEDJuQ3Wv/cjsEKvXJzhE7AyATT+10yRyFbuNIOfLu+V6APS/yE43IsugnRZeK8kmnAXoK7HCqmRFheIzS8N7AjyTriRW/zI5d6VCxh+lPQNo0QaTCumyKpBd0fhwKG0HgMkuDZq/RqhbpuVTjUTGmQDdaySZ1fXtZkaree8H2Mttt9G/1P6ujudqeKj9KYB7zEAZnmpN1UhUqDWl/avcPw20cle0TYSBrdwaXXHY5jMAIm5wWj6XAKcjKXaDO0SsD0BwvcDen80EapW9xntiOg2AJnf1D4YSt5dtaIphj0DaATB6V65eqNZd/ZU6UrEL30Hs+0DYZSFWyA2XNpti+RaxLgAyDSvtBg+7XZxN+kTLHetZgCaaZWVB0DAKHVLvCozYfS32ALR7PAp0HB7cM6BO62GbTwBMRlRr99qGFfoBqpF3f4a3B4CC5gbVLeO4LNLUcZT7+0CgRis0a9fugnRHl91R9AK0W7Xm/Tw5G+GmtllnM+EsoN0uVqdqQGr/N1e8rPLOOD8PtHy6Z8A4G8HUJuV9WXQGoBunNqPerhltCp/V7AWYDTHMno8NKJNOK9kG5FRAtMvkdjVUoWj1xVD7AbTccNBNbdvXEOq2mPHRct8F9u/UVCPkNlCzqO6g6kqs3QC/5/f8//NfAAAA//+vadAXy79aIAAAAABJRU5ErkJggg=="
+      "registeredAt": "2026-05-29T05:44:44.319026375+03:00",
+      "txHash": "mock-tx-register-d2a882d4-4db6-4970-82a7-fd24db02e0c4",
+      "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADXElEQVR42uyYMY61OgyFT5QiZXZwsxEE26K4UpAo2Fau2EjYgcsUiPPkMHfu/7/qFQ8mxbhiZr6CMfbxsfEbv/F/x0AyGRab4Jf1AJ6GAruRPJoBesClBxyZZewAPHsgcpP6p5uAwCUFFhhKJAXPPgiGTbg3B7g5BRlt9m4yBDpzOwBfIqnplBKZATQGAO6stCwuGULJmMxf9XAxoGW/blKeffDLHw9/9cVPAzUetSW5JEM39eDU/UtFrgV6SFwpWml+IckJ8BMevjFgBHyxJMbh8MUeoAIlHncBKgs7PCfNpD4wBV+Gw7u5HaCHoAtUwBcV+R3gkjST/V2AyXDMIJk51SwO9BN0Bh3NAEPm1AU6poDIrJVWJRec7wQWHYKWlJgMOb+yX6iv3g7QA6PdWG3DaA+4acgC7YuPFF8NqMivh+ecAsZB7csRqC9ZnmgG0N8hqMjDL7sR2AS42q39XUAPMgHlPXpY1f5LzVoBBsrYGXF7HxDXDMRXVRJ5K+0NgMmeWvZPBKp+FgUmu/FbaRsA+qDjSIo9gpYb3MyMEcB3qq8HhvqSLLbKAulmkjokWwIATpaidefV5JQzt1kH+I3AsmYP+6I49Xg6ccpw1n87gJ/s4d00EC4ZKag7TsYnk5cD9Wse0Go/9yyNqF/02TcDADIOmskEcapmkVlLTj6f+3Lgy+PpNDxn9LNuXkYQUzPAkM9FdTfEiPDlHxL8x+RcDgB+4eG5I9Srgla7mj1xbAfQ/wIPaNlx2QN1PvolBcF3TV4OIFD30HMadqgpPceiTc0AOpK6h0c8AtCdJlBQjyH9fQC0JfVHNVrkfASMXeBnbv48oO3QPcCZBIZN++J0XLDpLgBB3FplM9Q7jD5wspu8PUwLwFAr7YyYghSc/t27vb8LMLmep+rlJ6ZHVVTPdLquZgAKulPtJaZQS+4rk+kuQG3DrmVvKI5kXZ25kvxO9c8DGioXbzdY1Z6rusHbgHrY10yaDKd71nzAT8MmBe0A9U6b8T7P0tXr3pDx1634YiDU81SpK3z1eAD1axa0BawHdGOVuG6EfeVza47pTiA9oJ1YPbzuEVVey/sM2wKAcyzqRKRa0x3BL7uq2W1AvWxob77eiqqftPtja24A+I3f+O/xTwAAAP//NBsUQFUH38UAAAAASUVORK5CYII="
     }
   ],
-  "nextId": 7
+  "nextId": 8
 }
