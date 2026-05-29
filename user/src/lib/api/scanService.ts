@@ -123,9 +123,11 @@ async function submitScanToBackend(
   payload: { rawText: string; productId?: string },
   opts?: { timeoutMs?: number; signal?: AbortSignal },
 ): Promise<BackendScanResponse> {
-  const url = (import.meta.env.VITE_SCAN_API_URL as string | undefined) ?? "";
-  if (!url)
-    throw new BackendUnavailableError("VITE_SCAN_API_URL is not configured");
+  // Use the same API base as the rest of the app (VITE_API_URL or default localhost:8080)
+  const apiBase =
+    (import.meta.env.VITE_API_URL as string | undefined) ??
+    "http://localhost:8080/api/v1";
+  const url = `${apiBase}/products/decode-qr`;
 
   const controller = new AbortController();
   const timeoutMs = opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -134,10 +136,11 @@ async function submitScanToBackend(
   opts?.signal?.addEventListener("abort", onAbort, { once: true });
 
   try {
+    // The backend decode-qr endpoint expects { qrData: "<raw JSON text from QR>" }
     const res = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ qrData: payload.rawText }),
       signal: controller.signal,
     });
 
@@ -184,11 +187,48 @@ function normalizeBackendResponse(
   data: BackendScanResponse,
   parsedId?: string,
 ): Product | null {
+  // Backend decode-qr returns: { payload: {productId, ...}, product: {...}, found: bool }
+  // Check found flag — if false, the product was decoded but not in the store yet
+  if (isRecord(data) && data.found === false) {
+    // Still return what we can from the payload
+    const qrPayload = isRecord(data.payload) ? data.payload : null;
+    if (!qrPayload) return null;
+    const productId = firstString(qrPayload, ["productId", "id"]) ?? parsedId;
+    if (!productId) return null;
+    // Build a minimal product from the QR payload fields
+    const maybeProduct = qrPayload;
+    const weightGrams = firstNumber(maybeProduct, ["weightGrams"]);
+    const weightKg = weightGrams ? weightGrams / 1000 : 0;
+    const rawMaterial = firstNumber(maybeProduct, ["material"]);
+    const materialMap: Record<number, string> = {
+      0: "PET", 1: "Glass", 2: "Aluminum", 3: "Paper",
+      4: "Organic", 5: "Electronic", 6: "Other",
+    };
+    const material = rawMaterial != null ? (materialMap[rawMaterial] ?? "Other") : "Unknown";
+    const RATES_BY_MATERIAL: Record<string, number> = {
+      PET: 0.10, HDPE: 0.10, Aluminum: 0.15, Glass: 0.05,
+      Paper: 0.08, Cardboard: 0.08, Organic: 0.03, Electronic: 0.20, Other: 0.02,
+    };
+    const rate = RATES_BY_MATERIAL[material] ?? 0.02;
+    const weightGramsVal = weightGrams ?? weightKg * 1000;
+    const tokenReward = Number((weightGramsVal * rate).toFixed(1));
+    return {
+      id: productId,
+      name: firstString(maybeProduct, ["name"]) ?? "Unknown item",
+      material,
+      weightKg,
+      tokenReward,
+      manufacturer: firstString(maybeProduct, ["manufacturer"]) ?? "Unknown",
+      batchId: "—",
+      events: [],
+    } as Product;
+  }
+
   const maybeProduct = pickFirstObject(data, ["product", "item"]) ?? data;
   const productId =
     firstString(maybeProduct as Record<string, unknown>, [
-      "id",
       "productId",
+      "id",
       "itemId",
     ]) ?? parsedId;
   if (!productId) return null;
