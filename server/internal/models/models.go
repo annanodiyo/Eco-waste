@@ -293,3 +293,17 @@ func (s *Store) GetAllProducts() []*Product {
 	}
 	return out
 }
+
+func (s *Store) IsProductIDUsed(productID string) bool {
+	if productID == "" {
+		return false
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, d := range s.deposits {
+		if d.ProductID == productID && d.HasQR {
+			return true
+		}
+	}
+	return false
+}

@@ -35,13 +35,20 @@ func (h *WasteHandler) CreateDeposit(c *gin.Context) {
 
 	// If QR scan, look up product to get correct waste type.
 	if req.HasQR && req.ProductID != "" {
+		// Single-use check: prevent multiple deposits for the same QR-tagged product
+		if h.store.IsProductIDUsed(req.ProductID) {
+			c.JSON(http.StatusConflict, gin.H{"error": "This QR code has already been scanned and processed."})
+			return
+		}
+
 		product, ok := h.store.GetProduct(req.ProductID)
 		if !ok {
-			c.JSON(http.StatusNotFound, gin.H{"error": "product not found — is it registered?"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "product not found — is it registered??"})
 			return
 		}
 		wasteType = product.Material
 	}
+
 
 	tokens := models.CalculateTokens(wasteType, req.WeightGrams)
 
