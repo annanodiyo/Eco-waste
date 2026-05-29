@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Boxes, Truck, Coins, Loader2, AlertCircle } from "lucide-react";
+import { Coins, Loader2, AlertCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ChainBadge } from "@/components/ChainBadge";
 import { TxHash } from "@/components/TxHash";
