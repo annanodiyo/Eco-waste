@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { Download, Loader2, AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -9,8 +9,7 @@ import { TxHash } from "@/components/TxHash";
 import { listProducts, registerProduct, type WasteType } from "@/lib/api/ecoApi";
 
 export const Route = createFileRoute("/manufacturer")({
-  head: () => ({ meta: [{ title: "Manufacturer · EcoToken" }] }),
-  component: Manufacturer,
+  component: LegacyManufacturerRoute,
 });
 
 const MATERIAL_OPTIONS: { label: string; value: number }[] = [
@@ -51,7 +50,11 @@ interface Product {
   qrCode:       string;
 }
 
-function Manufacturer() {
+function LegacyManufacturerRoute() {
+  return <Navigate to="/dashboard" />;
+}
+
+export function ManufacturerDashboard() {
   const { address, connect } = useWallet();
 
   const [form, setForm] = useState({

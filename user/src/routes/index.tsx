@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, ScanLine, MapPin, Boxes, Recycle, Factory, Store, Truck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ChainBadge } from "@/components/ChainBadge";
-import { RoleGateway } from "@/components/RoleGateway";
 import { STAGES, PRODUCTS } from "@/lib/mockData";
+import { openRolePicker } from "@/lib/rolePicker";
 import proofImg from "@/assets/proof.jpg";
 
 export const Route = createFileRoute("/")({
@@ -58,13 +58,13 @@ function Landing() {
                 ledger event. Scan, drop off, and earn $ECO. No greenwashing. No double-counting.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
-                <a
-                  href="#choose-role"
+                <button
+                  onClick={openRolePicker}
                   className="inline-flex items-center gap-2 bg-zinc-900 text-white px-8 py-4 rounded-2xl text-base font-semibold hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-[0.98]"
                 >
                   Choose your role
                   <ArrowUpRight className="size-5" />
-                </a>
+                </button>
                 <Link
                   to="/journey/$itemId"
                   params={{ itemId: PRODUCTS[0].id }}
@@ -84,9 +84,6 @@ function Landing() {
             </div>
           </div>
         </section>
-
-        {/* Role gateway */}
-        <RoleGateway />
 
         {/* Chain scroller */}
         <section className="pt-4 pb-12">
@@ -225,11 +222,11 @@ function Landing() {
 
 function RoleLink({ label }: { label: string }) {
   return (
-    <a
-      href="#choose-role"
+    <button
+      onClick={openRolePicker}
       className="text-xs font-mono uppercase tracking-widest text-ui-dark border-b border-ui-dark/20 hover:text-brand-primary hover:border-brand-primary pb-0.5"
     >
       {label} →
-    </a>
+    </button>
   );
 }

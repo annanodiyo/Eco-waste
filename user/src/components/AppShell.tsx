@@ -9,119 +9,114 @@ import {
   Recycle,
   Factory,
   LayoutDashboard,
-  Gift,
-  History,
   ListChecks,
   Boxes,
   MapPin,
-  BarChart3,
-  CheckCircle2,
-  ClipboardList,
-  PackageCheck,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
 import { useWallet, shortAddr } from "@/lib/wallet";
-import { useRoleSession, pathToRole, isRolePath, type RoleKey } from "@/lib/roleSession";
-import { SwitchRoleModal } from "./SwitchRoleModal";
+import { useRoleSession, type RoleKey } from "@/lib/roleSession";
+import { consumeQueuedRolePickerOpen, onRolePickerOpen, openRolePicker } from "@/lib/rolePicker";
+import { RoleGateway } from "./RoleGateway";
 import type { ReactNode } from "react";
 
 type RoleDef = {
   key: RoleKey;
-  label: string;
-  path: "/consumer" | "/collector" | "/recycler" | "/manufacturer";
+  path: "/dashboard";
   icon: LucideIcon;
-  sections: { label: string; hash: string; icon: LucideIcon }[];
+  sections: { label: string; to: string; icon: LucideIcon }[];
 };
 
 const ROLES: Record<RoleKey, RoleDef> = {
   consumer: {
     key: "consumer",
-    label: "Consumer",
-    path: "/consumer",
+    path: "/dashboard",
     icon: ScanLine,
-    sections: [
-      { label: "Dashboard", hash: "dashboard", icon: LayoutDashboard },
-      { label: "Rewards", hash: "rewards", icon: Gift },
-      { label: "History", hash: "history", icon: History },
-      { label: "Wallet", hash: "wallet", icon: Wallet },
-    ],
+    sections: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard }],
   },
   collector: {
     key: "collector",
-    label: "Collector",
-    path: "/collector",
+    path: "/dashboard",
     icon: Truck,
     sections: [
-      { label: "Queue", hash: "queue", icon: ListChecks },
-      { label: "Inventory", hash: "inventory", icon: Boxes },
-      { label: "Pickups", hash: "pickups", icon: MapPin },
-      { label: "Wallet", hash: "wallet", icon: Wallet },
+      { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+      { label: "Queue", to: "/dashboard/queue", icon: ListChecks },
+      { label: "Inventory", to: "/dashboard/inventory", icon: Boxes },
+      { label: "Pickups", to: "/dashboard/pickups", icon: MapPin },
+      { label: "Wallet", to: "/dashboard", icon: Wallet },
     ],
   },
   recycler: {
     key: "recycler",
-    label: "Recycler",
-    path: "/recycler",
+    path: "/dashboard",
     icon: Recycle,
-    sections: [
-      { label: "Intake", hash: "intake", icon: PackageCheck },
-      { label: "Processing", hash: "processing", icon: Recycle },
-      { label: "Impact", hash: "impact", icon: BarChart3 },
-      { label: "Confirm", hash: "confirm", icon: CheckCircle2 },
-    ],
+    sections: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard }],
   },
   manufacturer: {
     key: "manufacturer",
-    label: "Manufacturer",
-    path: "/manufacturer",
+    path: "/dashboard",
     icon: Factory,
-    sections: [
-      { label: "Batches", hash: "batches", icon: Boxes },
-      { label: "Supply", hash: "supply", icon: Truck },
-      { label: "Audit", hash: "audit", icon: ClipboardList },
-      { label: "Reports", hash: "reports", icon: BarChart3 },
-    ],
+    sections: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard }],
   },
 };
+const MULTI_PAGE_ROLES = new Set<RoleKey>(["collector"]);
+const COLLECTOR_ALLOWED_PATHS = new Set([
+  "/dashboard",
+  "/dashboard/queue",
+  "/dashboard/inventory",
+  "/dashboard/pickups",
+]);
+
+function isWorkspacePath(path: string) {
+  return path === "/dashboard" || path.startsWith("/dashboard/");
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { address, connect, disconnect } = useWallet();
   const { activeRole, clearRole } = useRoleSession();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const [switchOpen, setSwitchOpen] = useState(false);
   const [denied, setDenied] = useState(false);
+  const [rolePickerOpen, setRolePickerOpen] = useState(false);
 
-  // Route guard: enforce role-based access on role paths.
+  useEffect(() => onRolePickerOpen(() => setRolePickerOpen(true)), []);
+
   useEffect(() => {
-    if (path === "/" && activeRole) {
-      // If user has a role, don't let them see landing again, lock them into their dashboard
-      navigate({ to: ROLES[activeRole].path });
-      return;
+    if (path === "/" && consumeQueuedRolePickerOpen()) {
+      setRolePickerOpen(true);
     }
+  }, [path]);
 
-    if (!isRolePath(path)) {
+  useEffect(() => {
+    if (!isWorkspacePath(path)) {
       setDenied(false);
       return;
     }
-    const routeRole = pathToRole(path);
+
     if (!activeRole) {
-      // No session — kick back to landing for role selection.
       setDenied(true);
-      navigate({ to: "/", hash: "choose-role" });
+      navigate({ to: "/" });
       return;
     }
-    if (routeRole && routeRole !== activeRole) {
+
+    if (!MULTI_PAGE_ROLES.has(activeRole) && path !== "/dashboard") {
       setDenied(true);
-      navigate({ to: ROLES[activeRole].path });
+      navigate({ to: "/dashboard" });
       return;
     }
+    if (activeRole === "collector" && !COLLECTOR_ALLOWED_PATHS.has(path)) {
+      setDenied(true);
+      navigate({ to: "/dashboard" });
+      return;
+    }
+
     setDenied(false);
   }, [path, activeRole, navigate]);
 
   const role = activeRole ? ROLES[activeRole] : null;
   const ActiveIcon = role?.icon;
+  const inDashboard = path === "/dashboard" || path.startsWith("/dashboard/");
 
   if (denied) {
     return (
@@ -143,44 +138,34 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-brand-primary/10 pb-24 md:pb-0">
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-zinc-200">
         <div className="px-4 max-w-screen-xl mx-auto h-14 flex items-center justify-between gap-4">
-          {/* Brand */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <span className="font-mono text-sm font-semibold tracking-tighter uppercase">
               EcoToken
             </span>
-            {role && ActiveIcon && (
-              <span className="hidden sm:inline-flex items-center gap-1.5 ml-2 pl-2 border-l border-zinc-200 text-[10px] font-mono uppercase tracking-widest text-ui-muted">
-                <ActiveIcon className="size-3 text-brand-primary" strokeWidth={2} />
-                Role: {role.label}
-              </span>
-            )}
           </Link>
 
-          {/* Center nav — sections of the active role only. Locked: no role switching here. */}
           <div className="hidden md:flex items-center gap-1 text-xs font-medium">
             {role ? (
               role.sections.map((s) => (
-                <a
-                  key={s.hash}
-                  href={`#${s.hash}`}
+                <Link
+                  key={s.to + s.label}
+                  to={s.to}
                   className="px-3 py-1.5 rounded-full text-ui-dark/80 hover:text-ui-dark hover:bg-zinc-100 transition-colors inline-flex items-center gap-1.5"
                 >
                   <s.icon className="size-3.5" strokeWidth={1.8} />
                   {s.label}
-                </a>
+                </Link>
               ))
             ) : (
-              <Link
-                to="/"
-                hash="choose-role"
+              <button
+                onClick={() => setRolePickerOpen(true)}
                 className="px-3 py-1.5 rounded-full text-ui-dark/80 hover:text-ui-dark hover:bg-zinc-100 transition-colors inline-flex items-center gap-1.5"
               >
                 Choose your role
-              </Link>
+              </button>
             )}
           </div>
 
-          {/* Exit/Change Role */}
           <div className="flex items-center gap-2 shrink-0">
             {role && (
               <button
@@ -216,19 +201,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* Mobile role-aware sub-nav (only when a role is active) */}
         {role && (
           <div className="md:hidden border-t border-zinc-200 overflow-x-auto no-scrollbar">
             <div className="flex gap-1 px-3 py-2 max-w-screen-xl mx-auto">
               {role.sections.map((s) => (
-                <a
-                  key={s.hash}
-                  href={`#${s.hash}`}
+                <Link
+                  key={s.to + s.label}
+                  to={s.to}
                   className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-ui-dark hover:bg-brand-primary/10 hover:text-brand-primary transition-colors"
                 >
                   <s.icon className="size-3.5" strokeWidth={1.8} />
                   {s.label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -237,7 +221,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {children}
 
-      {/* Mobile bottom bar — active role workspace controls only. */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-zinc-200 px-3 py-2 z-40">
         <div className="flex justify-around items-center max-w-md mx-auto">
           <Link
@@ -249,14 +232,22 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
           {role && ActiveIcon && (
             <Link
-              to={role.path}
-              className={`flex flex-col items-center gap-0.5 py-1.5 px-3 ${path === role.path ? "text-brand-primary" : "text-zinc-400"}`}
+              to="/dashboard"
+              className={`flex flex-col items-center gap-0.5 py-1.5 px-3 ${inDashboard ? "text-brand-primary" : "text-zinc-400"}`}
             >
-              <ActiveIcon className="size-5" strokeWidth={path === role.path ? 2.2 : 1.6} />
-              <span className="text-[10px] font-medium uppercase tracking-tighter">
-                {role.label}
-              </span>
+              <ActiveIcon className="size-5" strokeWidth={inDashboard ? 2.2 : 1.6} />
+              <span className="text-[10px] font-medium uppercase tracking-tighter">Dashboard</span>
             </Link>
+          )}
+          {!role && (
+            <button
+              onClick={openRolePicker}
+              aria-label="Choose your role"
+              className="flex flex-col items-center gap-0.5 py-1.5 px-3 text-zinc-400 hover:text-brand-primary transition-colors"
+            >
+              <LayoutDashboard className="size-5" strokeWidth={1.6} />
+              <span className="text-[10px] font-medium uppercase tracking-tighter">Role</span>
+            </button>
           )}
           {role && (
             <button
@@ -273,7 +264,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </nav>
 
-      <SwitchRoleModal open={switchOpen} onClose={() => setSwitchOpen(false)} />
+      <RoleGateway open={rolePickerOpen} onClose={() => setRolePickerOpen(false)} />
     </div>
   );
 }

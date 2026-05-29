@@ -1,61 +1,46 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Loader2, AlertCircle } from "lucide-react";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { Coins, Loader2, AlertCircle, QrCode, Scan, History, Trash2, ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { ChainBadge } from "@/components/ChainBadge";
-import { TxHash } from "@/components/TxHash";
 import { useWallet, shortAddr } from "@/lib/wallet";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  getPendingDeposits,
   depositWaste,
   decodeQR,
-  type WasteDeposit,
   type WasteType,
   type Product,
   WASTE_TYPE_LABELS,
+  WASTE_REWARD_RATES,
 } from "@/lib/api/ecoApi";
 import { QRScanner } from "@/components/QRScanner";
-import { QrCode, Scan, History, Trash2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import {
+  CollectorKpis,
+  CollectorPendingDepositsTable,
+  useCollectorDeposits,
+} from "@/components/collector/CollectorShared";
 
 export const Route = createFileRoute("/collector")({
-  head: () => ({ meta: [{ title: "Collection Point · EcoToken" }] }),
-  component: Collector,
+  component: LegacyCollectorRoute,
 });
 
-function Collector() {
-  const { address, connect } = useWallet();
-  const [pendingDeposits, setPendingDeposits] = useState<WasteDeposit[]>([]);
-  const [loadingDeposits, setLoadingDeposits] = useState(true);
-  const [processingId, setProcessingId] = useState<string | null>(null);
+function LegacyCollectorRoute() {
+  return <Navigate to="/dashboard" />;
+}
 
-  // Manual drop-off form
+export function CollectorDashboard() {
+  const { address, connect } = useWallet();
+  const { pendingDeposits, loadingDeposits, loadPending } = useCollectorDeposits();
+
   const [manualForm, setManualForm] = useState({
     depositorAddr: "",
     wasteType: 0 as WasteType,
     weightGrams: 500,
   });
   const [manualSubmitting, setManualSubmitting] = useState(false);
-  const [manualResult, setManualResult] = useState<WasteDeposit | null>(null);
   const [manualError, setManualError] = useState<string | null>(null);
 
-  // QR Scanning
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
-  const [isDecoding, setIsDecoding] = useState(false);
-
-  // Load pending deposits
-  const loadPending = () => {
-    setLoadingDeposits(true);
-    getPendingDeposits()
-      .then((res) => setPendingDeposits(res.deposits ?? []))
-      .catch(() => { })
-      .finally(() => setLoadingDeposits(false));
-  };
-
-  useEffect(() => {
-    loadPending();
-  }, []);
 
   const handleManualDeposit = async () => {
     if (!address) {
@@ -64,7 +49,6 @@ function Collector() {
     }
     setManualSubmitting(true);
     setManualError(null);
-    setManualResult(null);
     try {
       const result = await depositWaste({
         hasQr: !!scannedProduct,
@@ -74,10 +58,9 @@ function Collector() {
         wasteType: manualForm.wasteType,
         weightGrams: manualForm.weightGrams,
       });
-      setManualResult(result);
       toast.success(`Deposit recorded! ${result.tokensEarned} ECO awarded.`);
-      loadPending(); // refresh
-      setScannedProduct(null); // Clear scan after success
+      loadPending();
+      setScannedProduct(null);
     } catch (err: unknown) {
       setManualError(err instanceof Error ? err.message : "Deposit failed");
       toast.error(err instanceof Error ? err.message : "Deposit failed");
@@ -87,20 +70,23 @@ function Collector() {
   };
 
   const handleScan = async (qrData: string) => {
-    setIsDecoding(true);
     try {
       const result = await decodeQR(qrData);
       if (result.found && result.product) {
         setScannedProduct(result.product);
-        setManualForm({
-          ...manualForm,
+        setManualForm((current) => ({
+          ...current,
           wasteType: result.product.material as WasteType,
           weightGrams: result.product.weightGrams,
-        });
+        }));
         toast.success(`Product identified: ${result.product.name}`);
       } else if (result.payload) {
-        // Even if not in DB, we can trust the signed QR if it has the payload
-        const p = result.payload as any;
+        const p = result.payload as {
+          productId?: string;
+          name?: string;
+          material?: number;
+          weightGrams?: number;
+        };
         setScannedProduct({
           productId: p.productId || "unknown",
           name: p.name || "Unknown Product",
@@ -108,29 +94,25 @@ function Collector() {
           weightGrams: p.weightGrams ?? 0,
           materialName: WASTE_TYPE_LABELS[(p.material ?? 0) as WasteType],
         } as Product);
-        setManualForm({
-          ...manualForm,
+        setManualForm((current) => ({
+          ...current,
           wasteType: (p.material ?? 0) as WasteType,
           weightGrams: p.weightGrams ?? 0,
-        });
+        }));
         toast.info("Scanned offline-registered product");
       }
-    } catch (err) {
-      console.error("QR Decode error", err);
+    } catch (error) {
+      console.error("QR Decode error", error);
       toast.error("Invalid QR code format");
-    } finally {
-      setIsDecoding(false);
     }
   };
 
   const totalToday = pendingDeposits.reduce((acc, d) => acc + d.weightGrams, 0);
   const totalTokens = pendingDeposits.reduce((acc, d) => acc + d.tokensEarned, 0);
 
-  const RATES: Record<number, number> = {
-    0: 0.10, 1: 0.05, 2: 0.15, 3: 0.08, 4: 0.03, 5: 0.20, 6: 0.02,
-  };
-
-  const estimatedReward = (manualForm.weightGrams * (RATES[manualForm.wasteType] ?? 0.02)).toFixed(1);
+  const estimatedReward = (
+    manualForm.weightGrams * (WASTE_REWARD_RATES[manualForm.wasteType] ?? 0.02)
+  ).toFixed(1);
 
   return (
     <AppShell>
@@ -142,14 +124,9 @@ function Collector() {
             </p>
             <h1 className="text-3xl font-semibold tracking-tight mt-1">Operator Dashboard</h1>
           </div>
-          <div className="flex gap-3 text-xs font-mono">
-            <Kpi label="Pending" value={String(pendingDeposits.length)} />
-            <Kpi label="Weight" value={`${(totalToday / 1000).toFixed(1)} kg`} />
-            <Kpi label="Rewards" value={`${totalTokens} ECO`} icon={Coins} />
-          </div>
+          <CollectorKpis pendingDeposits={pendingDeposits} />
         </header>
 
-        {/* QR Scanning & Drop-off Section */}
         <div className="grid lg:grid-cols-3 gap-6">
           <section className="lg:col-span-2 bg-card ring-1 ring-black/5 rounded-[24px] p-8 space-y-6 shadow-sm">
             <div className="flex items-center justify-between">
@@ -308,60 +285,7 @@ function Collector() {
           </section>
         </div>
 
-        {/* Pending deposits table */}
-        <section>
-          <h2 className="text-xs font-mono uppercase tracking-widest text-ui-muted mb-4">
-            All pending deposits
-          </h2>
-          <div className="bg-card ring-1 ring-black/5 rounded-[12px] overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-zinc-50">
-                <tr>
-                  {["ID", "Depositor", "Material", "Weight", "Tokens", "TX", "Status"].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left font-mono text-[10px] text-ui-muted uppercase tracking-wider font-medium"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {loadingDeposits ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-ui-muted text-sm">
-                      <Loader2 className="size-4 animate-spin inline mr-2" />
-                      Loading…
-                    </td>
-                  </tr>
-                ) : pendingDeposits.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-ui-muted text-sm">
-                      No pending deposits. Record a drop-off above.
-                    </td>
-                  </tr>
-                ) : (
-                  pendingDeposits.map((d) => (
-                    <tr key={d.id}>
-                      <td className="px-4 py-4 font-mono text-xs">#{d.id}</td>
-                      <td className="px-4 py-4 font-mono text-xs">{shortAddr(d.depositorAddr)}</td>
-                      <td className="px-4 py-4">{d.wasteTypeName}</td>
-                      <td className="px-4 py-4 font-mono">{d.weightGrams}g</td>
-                      <td className="px-4 py-4 font-mono text-brand-secondary">+{d.tokensEarned}</td>
-                      <td className="px-4 py-4">
-                        <TxHash hash={d.txHash} />
-                      </td>
-                      <td className="px-4 py-4">
-                        <ChainBadge status="pending" />
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <CollectorPendingDepositsTable pendingDeposits={pendingDeposits} loadingDeposits={loadingDeposits} />
       </main>
 
       <QRScanner
@@ -370,19 +294,5 @@ function Collector() {
         onScan={handleScan}
       />
     </AppShell>
-  );
-}
-
-function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon?: React.ElementType }) {
-  return (
-    <div className="bg-card ring-1 ring-black/5 rounded-[10px] px-3 py-2 flex items-center gap-2">
-      {Icon && <Icon className="size-3.5 text-brand-primary" />}
-      <div>
-        <p className="text-[9px] font-mono uppercase tracking-widest text-ui-muted leading-none">
-          {label}
-        </p>
-        <p className="text-sm font-semibold mt-0.5 leading-none">{value}</p>
-      </div>
-    </div>
   );
 }

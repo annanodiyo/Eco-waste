@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { QrCode, TrendingUp, Award, Flame, Loader2, Coins, ArrowRight, RefreshCw } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -8,11 +8,14 @@ import { useWallet, shortAddr } from "@/lib/wallet";
 import { getDepositorHistory, getKshAmount, type WasteDeposit } from "@/lib/api/ecoApi";
 
 export const Route = createFileRoute("/consumer")({
-  head: () => ({ meta: [{ title: "Consumer Wallet · EcoToken" }] }),
-  component: Consumer,
+  component: LegacyConsumerRoute,
 });
 
-function Consumer() {
+function LegacyConsumerRoute() {
+  return <Navigate to="/dashboard" />;
+}
+
+export function ConsumerDashboard() {
   const { address, balance, connect, loading: walletLoading, refreshBalance } = useWallet();
   const [scanOpen, setScanOpen] = useState(false);
   const [deposits, setDeposits] = useState<WasteDeposit[]>([]);
