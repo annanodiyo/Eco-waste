@@ -216,11 +216,12 @@ async function requestWithFallback<T>(
   init: RequestInit | undefined,
   fallback: () => T | Promise<T>,
 ): Promise<T> {
-  if (typeof window !== "undefined" && window.localStorage.getItem(MOCK_MODE_KEY) === "1") {
-    return fallback();
-  }
   try {
-    return await request<T>(path, init);
+    const result = await request<T>(path, init);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(MOCK_MODE_KEY);
+    }
+    return result;
   } catch (err) {
     if (isBackendUnreachable(err)) {
       if (typeof window !== "undefined") {
