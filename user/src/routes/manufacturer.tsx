@@ -124,7 +124,7 @@ function Manufacturer() {
     a.click();
   };
 
-  const reward = +((form.weightGrams / 1000) * (RATES[form.material] ?? 0.02) * 43.4).toFixed(2);
+  const reward = (form.weightGrams * (RATES[form.material] ?? 0.02)).toFixed(1);
 
   return (
     <AppShell>
