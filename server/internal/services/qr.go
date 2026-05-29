@@ -30,7 +30,7 @@ func GenerateQR(payload QRPayload) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("generate qr: %w", err)
 	}
-	return base64.StdEncoding.EncodeToString(png), nil
+	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(png), nil
 }
 
 // DecodeQR decodes a raw JSON QR string back to a QRPayload.

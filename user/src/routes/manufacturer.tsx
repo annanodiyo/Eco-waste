@@ -119,7 +119,8 @@ function Manufacturer() {
   const downloadQR = () => {
     if (!registeredProduct) return;
     const a    = document.createElement("a");
-    a.href     = `data:image/png;base64,${registeredProduct.qrCode}`;
+    const prefix = registeredProduct.qrCode.startsWith("data:") ? "" : "data:image/png;base64,";
+    a.href     = `${prefix}${registeredProduct.qrCode}`;
     a.download = `ecotoken-${form.name.replace(/\s+/g, "-")}.png`;
     a.click();
   };
@@ -213,7 +214,7 @@ function Manufacturer() {
             {registeredProduct ? (
               <div className="space-y-4">
                 <img
-                  src={`data:image/png;base64,${registeredProduct.qrCode}`}
+                  src={registeredProduct.qrCode.startsWith("data:") ? registeredProduct.qrCode : `data:image/png;base64,${registeredProduct.qrCode}`}
                   alt="Product QR code"
                   className="w-48 h-48 rounded-lg mx-auto"
                 />
