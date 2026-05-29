@@ -1,0 +1,109 @@
+{
+  "deposits": [
+    {
+      "id": 1,
+      "productId": "",
+      "hasQr": false,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 1,
+      "wasteTypeName": "glass",
+      "weightGrams": 500,
+      "tokensEarned": 25,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-",
+      "timestamp": "2026-05-29T03:42:49.481375042+03:00"
+    },
+    {
+      "id": 2,
+      "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
+      "hasQr": true,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 24,
+      "tokensEarned": 2,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-e9db7b70-0212-438b-976b-261a0abbf66f",
+      "timestamp": "2026-05-29T03:45:15.284878853+03:00"
+    },
+    {
+      "id": 3,
+      "productId": "",
+      "hasQr": false,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 24,
+      "tokensEarned": 2,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-",
+      "timestamp": "2026-05-29T03:45:37.312184389+03:00"
+    },
+    {
+      "id": 4,
+      "productId": "",
+      "hasQr": false,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 24,
+      "tokensEarned": 2,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-",
+      "timestamp": "2026-05-29T03:45:38.71682288+03:00"
+    },
+    {
+      "id": 5,
+      "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
+      "hasQr": true,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 24,
+      "tokensEarned": 2,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-e9db7b70-0212-438b-976b-261a0abbf66f",
+      "timestamp": "2026-05-29T03:46:48.140442984+03:00"
+    },
+    {
+      "id": 6,
+      "productId": "",
+      "hasQr": false,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 500,
+      "tokensEarned": 50,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-",
+      "timestamp": "2026-05-29T03:47:27.35923228+03:00"
+    }
+  ],
+  "products": [
+    {
+      "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
+      "name": "Spring Water",
+      "material": 0,
+      "materialName": "plastic",
+      "weightGrams": 24,
+      "manufacturer": "Polymer Co.",
+      "walletAddr": "",
+      "registeredAt": "2026-05-29T03:43:46.594511642+03:00",
+      "txHash": "mock-tx-register-e9db7b70-0212-438b-976b-261a0abbf66f",
+      "qrCode": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADaklEQVR42uyZsY3rPBCEh1DAkB2YjRhiWw4EkIADtyVDjVAdbMhA4PxYWnp+zv7gWcfgGB103wE67+7sDI3f83v+9Qkkl+yYDF0CwPsM3IaVZO0GGAE7ewImu8dClskQlqu0X50EeD7mC8owe7Gbp00hM4VVuPUFLJSi7xyX6pjgcbuaHwCYRg9LCuIzu4TOAMAu1WEKlDgblqF6x9l89MOXgdb2q5Rp9O7x1w+fc/HDgJ6hglvIfMyGNo1guX6KyJeBEe5BCu9PHUkSQ/Us+upp7AYImSVUlPgkC7yQz4y4eSnDfBYwoskCppeIif6JxNlLif0AJr/KnUKGZXX2XuHKkFFiPQuAF7tk2GSyIzMQyaP/uwFG4BZWsfcZTAOFm8l8bF644TxAX9KpooqdDXlvLWfEcu4GMNTiujIwIy4ZOqQuBZWU8SwgZKefW4HJcgtV2867EihlQjcAvCCs5AZPciWm3fYUnAboRl5W1S7CbqY9V8VoTdgLEDJuQ3Wv/cjsEKvXJzhE7AyATT+10yRyFbuNIOfLu+V6APS/yE43IsugnRZeK8kmnAXoK7HCqmRFheIzS8N7AjyTriRW/zI5d6VCxh+lPQNo0QaTCumyKpBd0fhwKG0HgMkuDZq/RqhbpuVTjUTGmQDdaySZ1fXtZkaree8H2Mttt9G/1P6ujudqeKj9KYB7zEAZnmpN1UhUqDWl/avcPw20cle0TYSBrdwaXXHY5jMAIm5wWj6XAKcjKXaDO0SsD0BwvcDen80EapW9xntiOg2AJnf1D4YSt5dtaIphj0DaATB6V65eqNZd/ZU6UrEL30Hs+0DYZSFWyA2XNpti+RaxLgAyDSvtBg+7XZxN+kTLHetZgCaaZWVB0DAKHVLvCozYfS32ALR7PAp0HB7cM6BO62GbTwBMRlRr99qGFfoBqpF3f4a3B4CC5gbVLeO4LNLUcZT7+0CgRis0a9fugnRHl91R9AK0W7Xm/Tw5G+GmtllnM+EsoN0uVqdqQGr/N1e8rPLOOD8PtHy6Z8A4G8HUJuV9WXQGoBunNqPerhltCp/V7AWYDTHMno8NKJNOK9kG5FRAtMvkdjVUoWj1xVD7AbTccNBNbdvXEOq2mPHRct8F9u/UVCPkNlCzqO6g6kqs3QC/5/f8//NfAAAA//+vadAXy79aIAAAAABJRU5ErkJggg=="
+    }
+  ],
+  "nextId": 7
+}

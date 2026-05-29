@@ -1,37 +1,51 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { QrCode, TrendingUp, Award, Flame, Loader2 } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { QrCode, TrendingUp, Award, Flame, Loader2, Coins, ArrowRight, RefreshCw } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { QrScanModal } from "@/components/QrScanModal";
 import { TxHash } from "@/components/TxHash";
 import { useWallet, shortAddr } from "@/lib/wallet";
 import { getDepositorHistory, type WasteDeposit } from "@/lib/api/ecoApi";
-import { useCallback } from "react";
-import { ArrowRight, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/consumer")({
   head: () => ({ meta: [{ title: "Consumer Wallet · EcoToken" }] }),
   component: Consumer,
 });
 
+const API = "http://localhost:8080/api/v1";
+
+async function getKshAmount(address: string): Promise<number> {
+  const res = await fetch(`${API}/amount/${address}/kshs`);
+  if (!res.ok) return 0;
+  const data = await res.json();
+  return data.kshValue ?? 0;
+}
+
 function Consumer() {
   const { address, balance, connect, loading: walletLoading, refreshBalance } = useWallet();
   const [scanOpen, setScanOpen] = useState(false);
   const [deposits, setDeposits] = useState<WasteDeposit[]>([]);
   const [totalTokens, setTotalTokens] = useState(0);
+  const [kshAmount, setKshAmount] = useState<number | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // Load deposit history from backend
-  const refreshData = useCallback(() => {
+  // Load everything from backend
+  const refreshData = useCallback(async () => {
     if (!address) return;
     setLoadingHistory(true);
-    getDepositorHistory(address)
-      .then((res) => {
-        setDeposits(res.deposits ?? []);
-        setTotalTokens(res.totalTokens ?? 0);
-      })
-      .catch((err) => console.error("History fetch failed", err))
-      .finally(() => setLoadingHistory(false));
+    try {
+      const [histRes, ksh] = await Promise.all([
+        getDepositorHistory(address),
+        getKshAmount(address),
+      ]);
+      setDeposits(histRes.deposits ?? []);
+      setTotalTokens(histRes.totalTokens ?? 0);
+      setKshAmount(ksh);
+    } catch (err) {
+      console.error("Data fetch failed", err);
+    } finally {
+      setLoadingHistory(false);
+    }
     refreshBalance();
   }, [address, refreshBalance]);
 
@@ -59,10 +73,21 @@ function Consumer() {
                   <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">
                     Available Balance
                   </p>
-                  <h2 className="text-5xl font-bold mt-2 tracking-tight text-white">
-                    {address ? (balance || totalTokens).toLocaleString() : "—"}
-                  </h2>
-                  <p className="text-sm text-brand-secondary font-mono mt-1">$ECO Tokens</p>
+                  <div className="flex items-baseline gap-2">
+                    <h2 className="text-5xl font-bold mt-2 tracking-tight text-white">
+                      {address ? (balance || totalTokens).toLocaleString() : "—"}
+                    </h2>
+                    <span className="text-sm text-brand-secondary font-mono">$ECO</span>
+                  </div>
+                  
+                  {address && (
+                    <div className="mt-4 inline-flex items-center gap-2 bg-white/5 backdrop-blur-md rounded-full px-4 py-1.5 ring-1 ring-white/10">
+                      <Coins className="size-3.5 text-brand-secondary" />
+                      <span className="text-sm font-mono font-bold text-white">
+                        KES {kshAmount !== null ? kshAmount.toFixed(2) : "—"}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="size-12 bg-white/5 rounded-2xl flex items-center justify-center ring-1 ring-white/10 backdrop-blur-sm">
                   <TrendingUp className="size-6 text-brand-secondary" />
@@ -114,10 +139,11 @@ function Consumer() {
             <ArrowRight className="size-4 opacity-40" />
           </button>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <ImpactTile icon={Award} value={deposits.length > 20 ? "Master" : deposits.length > 10 ? "Expert" : "Rookie"} label="Eco Status" />
             <ImpactTile icon={Flame} value={String(deposits.length)} label="Total Drops" />
             <ImpactTile icon={TrendingUp} value={String(totalTokens)} label="Lifetime" />
+            <ImpactTile icon={Coins} value={kshAmount !== null ? `KSH ${kshAmount.toFixed(0)}` : "—"} label="Total Value" highlight />
           </div>
         </section>
 
@@ -145,13 +171,14 @@ function Consumer() {
                   <Th>Material</Th>
                   <Th>Weight</Th>
                   <Th>Earned</Th>
+                  <Th>KSH Value</Th>
                   <Th className="text-right">Chain Status</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {!address ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center">
+                    <td colSpan={6} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="size-12 bg-zinc-50 rounded-full flex items-center justify-center text-zinc-300">
                           <TrendingUp className="size-6" />
@@ -162,14 +189,14 @@ function Consumer() {
                   </tr>
                 ) : loadingHistory && deposits.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-ui-muted">
+                    <td colSpan={6} className="px-6 py-12 text-center text-ui-muted">
                       <Loader2 className="size-6 animate-spin mx-auto mb-2" />
                       Synchronizing history…
                     </td>
                   </tr>
                 ) : deposits.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center">
+                    <td colSpan={6} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="size-12 bg-zinc-50 rounded-full flex items-center justify-center text-zinc-300">
                           <QrCode className="size-6" />
@@ -194,6 +221,9 @@ function Consumer() {
                       <td className="px-6 py-5 font-bold text-brand-secondary">
                         +{d.tokensEarned} <span className="text-[10px] font-normal">ECO</span>
                       </td>
+                      <td className="px-6 py-5 font-mono text-emerald-600 font-semibold">
+                        KSH {(d.tokensEarned * 0.5).toFixed(2)}
+                      </td>
                       <td className="px-6 py-5 text-right">
                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                             d.status === 1 ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 
@@ -212,35 +242,56 @@ function Consumer() {
               </tbody>
             </table>
           </div>
+
+          {/* KSH total summary row */}
+          {address && deposits.length > 0 && kshAmount !== null && (
+            <div className="mt-4 flex justify-end">
+              <div className="inline-flex items-center gap-3 bg-emerald-50 ring-1 ring-emerald-200 rounded-2xl px-5 py-3 shadow-sm border border-white">
+                <div className="size-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <Coins className="size-4 text-emerald-600" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-widest font-bold">Estimated Liquidity</span>
+                  <span className="text-lg text-emerald-700 font-bold leading-none">
+                    KES {kshAmount.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       </main>
 
-      <QrScanModal
-        open={scanOpen}
-        onClose={handleScanComplete}
-      />
+      <QrScanModal open={scanOpen} onClose={handleScanComplete} />
     </AppShell>
   );
 }
 
 function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <th
-      className={`px-4 py-3 font-mono text-[10px] text-ui-muted uppercase tracking-wider font-medium ${className}`}
-    >
+    <th className={`px-4 py-3 font-mono text-[10px] text-ui-muted uppercase tracking-wider font-medium ${className}`}>
       {children}
     </th>
   );
 }
 
-function ImpactTile({ icon: Icon, value, label }: { icon: React.ElementType; value: string; label: string }) {
+function ImpactTile({
+  icon: Icon, value, label, highlight = false,
+}: {
+  icon: React.ElementType; value: string; label: string; highlight?: boolean;
+}) {
   return (
-    <div className="bg-card ring-1 ring-black/5 rounded-[12px] p-3">
-      <Icon className="size-4 text-brand-primary mb-2" strokeWidth={1.8} />
-      <p className="text-xl font-semibold leading-none">{value}</p>
-      <p className="text-[10px] font-mono uppercase tracking-widest text-ui-muted mt-1">
-        {label}
+    <div className={`ring-1 rounded-[20px] p-4 transition-all hover:shadow-md ${highlight ? "bg-emerald-50/50 ring-emerald-100 border-b-2 border-emerald-500" : "bg-white ring-black/5"}`}>
+      <div className={`size-8 rounded-lg flex items-center justify-center mb-3 ${highlight ? "bg-emerald-100" : "bg-zinc-50"}`}>
+        <Icon
+          className={`size-4 ${highlight ? "text-emerald-600" : "text-brand-primary"}`}
+          strokeWidth={2}
+        />
+      </div>
+      <p className={`text-xl font-bold tracking-tight leading-none ${highlight ? "text-emerald-700" : "text-zinc-900"}`}>
+        {value}
       </p>
+      <p className="text-[10px] font-mono uppercase tracking-widest text-ui-muted mt-2 font-medium">{label}</p>
     </div>
   );
 }
