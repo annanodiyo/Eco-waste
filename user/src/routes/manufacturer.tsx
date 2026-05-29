@@ -4,6 +4,9 @@ import { Download, Loader2, AlertCircle, CheckCircle2, RefreshCw } from "lucide-
 import { AppShell } from "@/components/AppShell";
 import { ChainBadge } from "@/components/ChainBadge";
 
+import { useWallet, shortAddr } from "@/lib/wallet";
+import { TxHash } from "@/components/TxHash";
+
 export const Route = createFileRoute("/manufacturer")({
   head: () => ({ meta: [{ title: "Manufacturer · EcoToken" }] }),
   component: Manufacturer,
@@ -35,39 +38,6 @@ const RATES: Record<number, number> = {
   0: 0.10, 1: 0.05, 2: 0.15, 3: 0.08, 4: 0.03, 5: 0.20, 6: 0.02,
 };
 
-function useWallet() {
-  const [address, setAddress] = useState<string | null>(null);
-
-  const connect = useCallback(async () => {
-    const eth = (window as any).ethereum;
-    if (!eth) { alert("No wallet detected — install MetaMask."); return; }
-    try {
-      const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
-      if (accounts[0]) setAddress(accounts[0]);
-    } catch (e) {
-      console.error("Wallet connect failed:", e);
-    }
-  }, []);
-
-  useEffect(() => {
-    const eth = (window as any).ethereum;
-    if (!eth) return;
-    eth.request({ method: "eth_accounts" }).then((accounts: string[]) => {
-      if (accounts[0]) setAddress(accounts[0]);
-    });
-  }, []);
-
-  return { address, connect };
-}
-
-function shortAddr(addr: string): string {
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
-
-function TxHash({ hash }: { hash: string }) {
-  const display = hash.startsWith("mock") ? "mock-chain" : `${hash.slice(0, 8)}…`;
-  return <span className="font-mono text-xs text-ui-muted">{display}</span>;
-}
 
 interface Product {
   productId:    string;
