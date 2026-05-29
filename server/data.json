@@ -1,6 +1,21 @@
 {
   "deposits": [
     {
+      "id": 6,
+      "productId": "",
+      "hasQr": false,
+      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
+      "wasteType": 0,
+      "wasteTypeName": "plastic",
+      "weightGrams": 500,
+      "tokensEarned": 50,
+      "status": 0,
+      "statusName": "pending",
+      "txHash": "mock-tx-deposit-",
+      "timestamp": "2026-05-29T03:47:27.35923228+03:00"
+    },
+    {
       "id": 1,
       "productId": "",
       "hasQr": false,
@@ -74,24 +89,33 @@
       "statusName": "pending",
       "txHash": "mock-tx-deposit-e9db7b70-0212-438b-976b-261a0abbf66f",
       "timestamp": "2026-05-29T03:46:48.140442984+03:00"
-    },
-    {
-      "id": 6,
-      "productId": "",
-      "hasQr": false,
-      "depositorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
-      "collectorAddr": "0xfeb0b90fc0e5484fb1e16ec498eee0d04f6101f4",
-      "wasteType": 0,
-      "wasteTypeName": "plastic",
-      "weightGrams": 500,
-      "tokensEarned": 50,
-      "status": 0,
-      "statusName": "pending",
-      "txHash": "mock-tx-deposit-",
-      "timestamp": "2026-05-29T03:47:27.35923228+03:00"
     }
   ],
   "products": [
+    {
+      "productId": "66fe9b1c-381b-4a1e-bde7-ad96deb10fc5",
+      "name": "Test Bottle",
+      "material": 0,
+      "materialName": "plastic",
+      "weightGrams": 500,
+      "manufacturer": "TestCorp",
+      "walletAddr": "",
+      "registeredAt": "2026-05-29T05:42:01.159763563+03:00",
+      "txHash": "mock-tx-register-66fe9b1c-381b-4a1e-bde7-ad96deb10fc5",
+      "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADVklEQVR42uyZMY78rBLEy3JAyA2Gi1j2tRxYMtIEvhaWL4JvQEhgUU/dntn9T/aCb1mCJULWbyREd9NVPfhbf+u/XhPJo9gsmzxFYN0jfX+SLM0AI2AEWEZwCy7JF0ueuqkFOG6ho/FdtHnoEnrKac/Eqy3gIOUC09wXGN+RQlYGAmCepN3IZPwUMaMxADDBEWsB1tAxrwFpDd1HPvwwoGl/pryMzm7/bD7r4pcBWX2x6Hdahi5puHnEj0fkh4HRpfV6AH1wEs3vmzTP0gwgJdlHa7gzGUZrJNPmwTEvqAYwrcElwz0Cw0M+uYTpbA3A4FJeppjMUST2jrkvIENFwDACS0esPHmH9TiJZWwHiJjlAvsCvVI+GbldsPqk1AFG3NkOgB4uZXn2V5LmQjuAY56YzNVFbuFhjVCSdrkPtYDuPlLud0rGkwwO6KPNX1f9+wAc5j6CvotpBmDIiHkq9p1yFQCJ5sF0V+LElFdGywvWsDQDdLQS7izPvhxeUk5p41ELgAitiIwu0g+O9ECSuzXP0AwwxSQXSO73RqJsPZxWayVgdLdQ74ummwCS9mwMUEeTtUhV5IxOujlESNQCwO0okNdAVB+xAPYl/5oB4KzvRbEDdlO13EkTj+CzVANu6yc+C+tL7FF60Fs/tABMxIyHla2UpJXDSwJaETqVAI3mmbL60MHR+FEBfIT7lwG4NA8ALyAZyuFJm9Gl92tfBYDoK/E4CXqlXbSUL2tLgMhm0Z8iRKMVa2O9WMRnNUD0lXQcSXkJK587sep0CM0AIzTTRC1LbSase9SW9O7dFYAppvUoqq/sLUanqEX6T9/8dUC1zUnDInl3JlVbry+1AADrJY9pgPUDVLpw45m+VHETgPWDtmzRNrA3EBwrAtJoDlEsI0S6W3NNESbcx24GYNKh1TXF9+RTHEexX3OYnwcmwuj7sEfJfb4KQX4yNgPoVE09stPxo/HqOCIqAvd0keYZHFbd7NQxY0vAa/IvjlWn6+Jx6NXD1gMct/BA7hmT2Ie8vAvhe/7QBHCcam14m+WXff74a6ACUESoO5jLJV5w9AO+FWkLAGDEVixdtH54QKwr/VQsvyZaPw68BvuiFnTyeSvS4YG32GsB+Ft/6/9f/wsAAP//CUNLFC28TxIAAAAASUVORK5CYII="
+    },
+    {
+      "productId": "c563780a-d8f8-486d-96b9-7b1e476ff545",
+      "name": "Spring Water 500ml",
+      "material": 0,
+      "materialName": "plastic",
+      "weightGrams": 24,
+      "manufacturer": "Polymer Co.",
+      "walletAddr": "",
+      "registeredAt": "2026-05-29T05:42:12.591364127+03:00",
+      "txHash": "mock-tx-register-c563780a-d8f8-486d-96b9-7b1e476ff545",
+      "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAADYElEQVR42uyZP46sPBDECxE49A3wRRC+FgESSBPMtRhxEXMDhwTI9akMM/s2+4K3fg7WEbv7C/ynu7q6F7/rd/3t5UmuHcwyOIwteUwDItqdZKoGGACzdpZ8Mc4M4DI4knvMfyoEOD63PWJmsMu9ScDvkWd1wNGuwNh31nAFj74pDiR7X6A22QSMqAwAzJbApaF9rg0BOH18i4cfBhT2uslpcPb5x8e3vPjXgNYdadQpBGD04ZuI/DCgR1xhzSM5SzICDXn4nTzrAbR6wDwS4gjYO9KaeEzFgCbEeUv2mF/EfLrI09NySzjaVA3gL+3C1IQ4olOS6jjukpQyQEM+T0ez5N2S5rHCPrnT3GFfAzBIVzvwzNoFa05cp/jE5M8DPmhL0egC0Tc8LhHr8BGxCoBGz61K7QPGHsj18YDj57l/HtCWNkbML3LxwV760CaYtz7UACACsJgTYo6yaYBV7TZLMWBweAd4RBusWZQITPYT9hUADbn0HTA1VF6Aj1V50eG4D1kCCNGsuknmvcFQz9o7YhrqAWgXn6zqd/7ZnD5wgSMXlAI8r3VKSHNphuMz/yrVBCwtI9rVRSOToyZDJke1qRQQpA/EdLs+pWSWtWOqB2iuU+THNWsTzTnALj7gmNdSwCCPt/Myw3rDpWGu0e+brAHwzNWIjxezmvHBAKkZH6kUMMA+N4l8EzAzWamZmkE19PUALo49rI7CQ5s/72ZQjqsQABfN6e5o9wFm8cyu5u2KawCaW1e5OiUIpbTRbHrytRQAZykzrE0+V0CtDY/+y5HWAORmXs3gevkHibw9Wn6euwCge5Mr1gXOZ5fnDDCS/nfyVgAMwCj/uejd+85SpI7zDrkCAFyczxxyYPZWk0rz6XjM9QBqVHt3DfSyf5hyDxvwiYcSAOazu7QL6grf07OvPqsCgBE9cMjDz3d9xNiq2SkGeAV5B/VZ1yxoAuwhQ3PWA+SpmrLgdoNXNWzlBlEK8JfQGzJYbjvN48U8Zvw6xb8H8px2p7xfnGWbW5mcbHtSMeAe7LcJuX0wZ5Of9c/xYx1AwjF5Jel1pRj9l3UvBezR8BXi2O5U7F3kgnoAtRWwfLwCrslechjlH5ahFJDbK7mF5Kx8TP43DbfwGXzUAPyu3/X/138BAAD//4LpGMk/U4ErAAAAAElFTkSuQmCC"
+    },
     {
       "productId": "e9db7b70-0212-438b-976b-261a0abbf66f",
       "name": "Spring Water",
