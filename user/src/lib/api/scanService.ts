@@ -194,30 +194,71 @@ function normalizeBackendResponse(
   if (!productId) return null;
 
   const fromMock = PRODUCTS.find((p) => p.id === productId);
+  
+  const weightGrams = firstNumber(maybeProduct as Record<string, unknown>, ["weightGrams"]);
+  const weightKg =
+    firstNumber(maybeProduct as Record<string, unknown>, [
+      "weightKg",
+      "weight",
+    ]) ??
+    (weightGrams ? weightGrams / 1000 : undefined) ??
+    fromMock?.weightKg ??
+    0;
+
+  const rawMaterial =
+    firstString(maybeProduct as Record<string, unknown>, ["material", "materialName"]) ??
+    firstNumber(maybeProduct as Record<string, unknown>, ["material"]) ??
+    fromMock?.material ??
+    "Unknown";
+
+  // Map backend material to frontend standard
+  let material = "Unknown";
+  if (typeof rawMaterial === "number") {
+    const mapping: Record<number, string> = {
+      0: "PET",
+      1: "Glass",
+      2: "Aluminum",
+      3: "Paper",
+      4: "Organic",
+      5: "Electronic",
+      6: "Other"
+    };
+    material = mapping[rawMaterial] ?? "Unknown";
+  } else {
+    material = rawMaterial;
+  }
+
+  // Calculate token reward if missing from backend
+  const weightGramsVal = weightGrams ?? weightKg * 1000;
+  const RATES_BY_MATERIAL: Record<string, number> = {
+    PET: 0.10,
+    HDPE: 0.10,
+    Aluminum: 0.15,
+    Glass: 0.05,
+    Paper: 0.08,
+    Cardboard: 0.08,
+    Organic: 0.03,
+    Electronic: 0.20,
+    Other: 0.02,
+  };
+  const rate = RATES_BY_MATERIAL[material] ?? 0.02;
+  const tokenReward =
+    firstNumber(maybeProduct as Record<string, unknown>, [
+      "tokenReward",
+      "reward",
+    ]) ??
+    fromMock?.tokenReward ??
+    Number((weightGramsVal * rate).toFixed(1));
+
   const mapped: Partial<Product> = {
     id: productId,
     name:
       firstString(maybeProduct as Record<string, unknown>, ["name"]) ??
       fromMock?.name ??
       "Unknown item",
-    material:
-      firstString(maybeProduct as Record<string, unknown>, ["material"]) ??
-      fromMock?.material ??
-      "Unknown",
-    weightKg:
-      firstNumber(maybeProduct as Record<string, unknown>, [
-        "weightKg",
-        "weight",
-      ]) ??
-      fromMock?.weightKg ??
-      0,
-    tokenReward:
-      firstNumber(maybeProduct as Record<string, unknown>, [
-        "tokenReward",
-        "reward",
-      ]) ??
-      fromMock?.tokenReward ??
-      0,
+    material,
+    weightKg,
+    tokenReward,
     manufacturer:
       firstString(maybeProduct as Record<string, unknown>, ["manufacturer"]) ??
       fromMock?.manufacturer ??
@@ -265,7 +306,7 @@ function pickFirstObject(data: unknown, keys: string[]) {
 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
-  return !!v && typeof v === "object";
+  return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
 async function safeReadText(res: Response) {
